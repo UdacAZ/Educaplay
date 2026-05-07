@@ -5,7 +5,7 @@
 
   /* ── PATH DETECTION ─────────────────────────────────────────── */
   var inJogos = window.location.pathname.replace(/\\/g, '/').includes('/jogos/');
-  var BASE = (inJogos ? '../' : '') + 'imag/mipo%20mascote/';
+  var BASE = (inJogos ? '../' : '') + 'imag/mascote/';
 
   var IMG_NORMAL  = BASE + 'mipo_mascote.png';
   var IMG_CORRECT = BASE + 'mipo_feliz_acerto.png';

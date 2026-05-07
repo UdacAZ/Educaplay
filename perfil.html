@@ -6,6 +6,7 @@
   <title>EducaPlay - Meu Perfil</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body class="dashboard-page">
 
@@ -25,13 +26,13 @@
     </nav>
     <div class="sidebar-bottom">
       <div class="user-card">
-        <div class="user-avatar">👦</div>
+        <div class="user-avatar" id="sidebarAvatar">👦</div>
         <div class="user-info">
-          <strong>Olá, Aluno!</strong>
+          <strong id="sidebarNome">Carregando...</strong>
           <span>Plano Mensal</span>
         </div>
       </div>
-      <a href="index.html" class="nav-item logout">
+      <a href="#" class="nav-item logout" onclick="signOut(); return false;">
         <span class="nav-icon">🚪</span><span class="nav-label">Sair</span>
       </a>
     </div>
@@ -102,14 +103,14 @@
                 <label>Nome</label>
                 <div class="input-wrapper">
                   <span class="input-icon">👤</span>
-                  <input type="text" id="inputNome" value="Aluno" required />
+                  <input type="text" id="inputNome" value="" required />
                 </div>
               </div>
               <div class="form-group">
                 <label>E-mail</label>
                 <div class="input-wrapper input-readonly">
                   <span class="input-icon">📧</span>
-                  <input type="email" value="aluno@email.com" readonly />
+                  <input type="email" id="inputEmail" value="" readonly />
                 </div>
                 <span class="form-hint">Para alterar o e-mail, vá em <a href="#" onclick="showTab('seguranca', document.querySelector('[data-tab=seguranca]'))">Segurança</a></span>
               </div>
@@ -382,7 +383,40 @@
 
   <div class="toast" id="toast"></div>
 
+  <script src="auth.js"></script>
   <script>
+    let _userId = null;
+
+    /* ---- Init ---- */
+    (async function initPerfil() {
+      const ctx = await requireAuth();
+      if (!ctx) return;
+      _userId = ctx.user.id;
+      const nome   = ctx.profile?.nome       || ctx.user.email.split('@')[0];
+      const avatar = ctx.profile?.avatar     || '👦';
+      const ano    = ctx.profile?.ano_escolar || '3º ano';
+
+      document.getElementById('sidebarNome').textContent    = `Olá, ${nome}!`;
+      document.getElementById('sidebarAvatar').textContent  = avatar;
+      document.querySelector('.header-avatar').textContent  = avatar;
+      document.getElementById('inputNome').value            = nome;
+      document.getElementById('inputEmail').value           = ctx.user.email;
+      document.getElementById('avatarDisplay').textContent  = avatar;
+
+      /* Marca o botão de avatar correto como selecionado */
+      document.querySelectorAll('.av-opt').forEach(b => {
+        b.classList.toggle('selected', b.textContent === avatar);
+      });
+
+      /* Ano escolar */
+      const sel = document.querySelector('#tab-perfil select');
+      if (sel) {
+        for (const opt of sel.options) {
+          if (opt.value === ano || opt.textContent === ano) { opt.selected = true; break; }
+        }
+      }
+    })();
+
     /* ---- Sidebar ---- */
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('open');
@@ -406,7 +440,7 @@
       const t = document.getElementById('toast');
       t.textContent = msg;
       t.className = `toast ${type} show`;
-      setTimeout(() => t.classList.remove('show'), 3000);
+      setTimeout(() => t.classList.remove('show'), 3500);
     }
     function saveToast() { showToast('✅ Preferência salva!'); }
 
@@ -417,12 +451,21 @@
       document.getElementById('avatarDisplay').textContent = emoji;
     }
 
-    /* ---- Forms ---- */
-    function savePerfil(e) {
+    /* ---- Salvar Perfil ---- */
+    async function savePerfil(e) {
       e.preventDefault();
+      if (!_userId) return;
+      const nome   = document.getElementById('inputNome').value.trim();
+      const avatar = document.getElementById('avatarDisplay').textContent;
+      const ano    = document.querySelector('#tab-perfil select')?.value || '3º ano';
+      const { error } = await updateProfile(_userId, { nome, avatar, ano_escolar: ano });
+      if (error) { showToast('Erro ao salvar: ' + error.message, 'error'); return; }
+      document.getElementById('sidebarNome').textContent   = `Olá, ${nome}!`;
+      document.getElementById('sidebarAvatar').textContent = avatar;
       showToast('✅ Perfil atualizado!');
     }
 
+    /* ---- Segurança ---- */
     function toggleVis(id) {
       const el = document.getElementById(id);
       el.type = el.type === 'password' ? 'text' : 'password';
@@ -437,31 +480,36 @@
       if (/[^A-Za-z0-9]/.test(val)) score++;
       const colors = ['#e74c3c', '#e67e22', '#f1c40f', '#27ae60'];
       const widths  = ['25%', '50%', '75%', '100%'];
-      bar.style.width     = val.length ? (widths[score - 1]  || '10%')       : '0%';
+      bar.style.width      = val.length ? (widths[score - 1]  || '10%')   : '0%';
       bar.style.background = val.length ? (colors[score - 1] || '#e74c3c') : 'transparent';
     }
 
-    function changePassword(e) {
+    async function changePassword(e) {
       e.preventDefault();
       const nv = document.getElementById('newPwd').value;
       const cf = document.getElementById('confPwd').value;
-      if (nv !== cf) { showToast('As senhas não coincidem!', 'error'); return; }
+      if (nv !== cf)     { showToast('As senhas não coincidem!', 'error'); return; }
       if (nv.length < 8) { showToast('Senha muito curta!', 'error'); return; }
+      const { error } = await updatePassword(nv);
+      if (error) { showToast('Erro: ' + error.message, 'error'); return; }
       showToast('✅ Senha alterada com sucesso!');
       e.target.reset();
       document.querySelector('#secBar .ps-bar').style.width = '0';
     }
 
-    function changeEmail(e) {
+    async function changeEmail(e) {
       e.preventDefault();
-      showToast('✅ E-mail de confirmação enviado!');
+      const novoEmail = e.target.querySelector('input[type="email"]').value.trim();
+      const { error } = await updateEmail(novoEmail);
+      if (error) { showToast('Erro: ' + error.message, 'error'); return; }
+      showToast('✅ E-mail de confirmação enviado para ' + novoEmail + '!');
       e.target.reset();
     }
 
-    function confirmDelete() {
+    async function confirmDelete() {
       if (confirm('⚠️ Tem certeza? Esta ação é irreversível e apagará todos os seus dados.')) {
-        showToast('Conta excluída. Redirecionando...', 'error');
-        setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+        showToast('Saindo...', 'error');
+        await deleteAccount();
       }
     }
 

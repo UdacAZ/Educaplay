@@ -6,6 +6,7 @@
   <title>EducaPlay - Entrar</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body class="auth-page">
 
@@ -92,7 +93,7 @@
         </form>
 
         <div class="auth-divider"><span>ou</span></div>
-        <button class="btn btn-social">
+        <button class="btn btn-social" onclick="handleGoogle()">
           <img src="https://www.google.com/favicon.ico" width="18" alt="Google" /> Entrar com Google
         </button>
 
@@ -144,7 +145,7 @@
         </form>
 
         <div class="auth-divider"><span>ou</span></div>
-        <button class="btn btn-social">
+        <button class="btn btn-social" onclick="handleGoogle()">
           <img src="https://www.google.com/favicon.ico" width="18" alt="Google" /> Continuar com Google
         </button>
 
@@ -157,9 +158,12 @@
   <div class="toast" id="toast"></div>
 
   <script src="nipo.js"></script>
+  <script src="auth.js"></script>
   <script>
     window.addEventListener('load', function () {
       nipoWelcome('Olá! Faça login e vamos estudar juntos! 🌟<br>Eu acredito em você!');
+      /* Se já estiver logado, vai direto pro dashboard */
+      getUser().then(u => { if (u) window.location.href = 'dashboard.html'; });
     });
 
     function switchTab(tab, el) {
@@ -199,23 +203,35 @@
       const toast = document.getElementById('toast');
       toast.textContent = msg;
       toast.className = `toast ${type} show`;
-      setTimeout(() => toast.classList.remove('show'), 3000);
+      setTimeout(() => toast.classList.remove('show'), 3500);
     }
 
-    function handleLogin(e) {
+    async function handleLogin(e) {
       e.preventDefault();
-      showToast('✅ Entrando...');
-      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+      const email = document.getElementById('loginEmail').value.trim();
+      const pwd   = document.getElementById('loginPassword').value;
+      showToast('Entrando...');
+      const { error } = await signInEmail(email, pwd);
+      if (error) { showToast('E-mail ou senha incorretos!', 'error'); return; }
+      window.location.href = 'dashboard.html';
     }
 
-    function handleCadastro(e) {
+    async function handleCadastro(e) {
       e.preventDefault();
-      const pwd = document.getElementById('cadPassword').value;
+      const nome    = document.getElementById('cadNome').value.trim();
+      const email   = document.getElementById('cadEmail').value.trim();
+      const pwd     = document.getElementById('cadPassword').value;
       const confirm = document.getElementById('cadConfirm').value;
       if (pwd !== confirm) { showToast('As senhas não coincidem!', 'error'); return; }
-      if (pwd.length < 8) { showToast('Senha deve ter pelo menos 8 caracteres!', 'error'); return; }
-      showToast('🎉 Conta criada com sucesso!');
-      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+      if (pwd.length < 8)  { showToast('Senha deve ter pelo menos 8 caracteres!', 'error'); return; }
+      showToast('Criando conta...');
+      const { error } = await signUpEmail(email, pwd, nome);
+      if (error) { showToast(error.message, 'error'); return; }
+      showToast('🎉 Conta criada! Verifique seu e-mail para confirmar.');
+    }
+
+    async function handleGoogle() {
+      await signInGoogle();
     }
   </script>
 </body>

@@ -6,6 +6,7 @@
   <title>EducaPlay - Meus Jogos</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body class="dashboard-page">
 
@@ -30,13 +31,13 @@
 
     <div class="sidebar-bottom">
       <div class="user-card">
-        <div class="user-avatar">👦</div>
+        <div class="user-avatar" id="sidebarAvatar">👦</div>
         <div class="user-info">
-          <strong>Olá, Aluno!</strong>
+          <strong id="sidebarNome">Carregando...</strong>
           <span>Plano Mensal</span>
         </div>
       </div>
-      <a href="index.html" class="nav-item logout">
+      <a href="#" class="nav-item logout" onclick="signOut(); return false;">
         <span class="nav-icon">🚪</span><span class="nav-label">Sair</span>
       </a>
     </div>
@@ -65,7 +66,7 @@
     <!-- WELCOME BANNER -->
     <div class="welcome-banner">
       <div class="welcome-text">
-        <h2>Olá, Aluno! 👋</h2>
+        <h2 id="welcomeNome">Olá! 👋</h2>
         <p>Pronto para aprender algo novo hoje? Temos <strong>10 jogos</strong> disponíveis para você!</p>
       </div>
       <div class="welcome-deco">
@@ -298,6 +299,19 @@
       document.getElementById('gamesCount').textContent = `${count} jogos`;
     }
 
+  </script>
+  <script src="auth.js"></script>
+  <script>
+    (async function initDashboard() {
+      const ctx = await requireAuth();
+      if (!ctx) return;
+      const nome   = ctx.profile?.nome   || ctx.user.email.split('@')[0];
+      const avatar = ctx.profile?.avatar || '👦';
+      document.getElementById('welcomeNome').textContent = `Olá, ${nome}! 👋`;
+      document.getElementById('sidebarNome').textContent = `Olá, ${nome}!`;
+      document.getElementById('sidebarAvatar').textContent = avatar;
+      document.querySelector('.header-avatar').textContent = avatar;
+    })();
   </script>
 </body>
 </html>
