@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fábrica de Palavras – EducaPlay</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pu: #7B1FA2; --pu-d: #4A148C; --pu-l: #E1BEE7; --pu-bg: #F3E5F5;
+      --am: #FF8F00; --am-l: #FFF8E1; --am-d: #E65100;
+      --gr: #43A047; --gr-d: #2E7D32; --gr-l: #E8F5E9;
+      --re: #E53935; --re-l: #FFEBEE;
+      --bl: #1976D2; --bl-l: #E3F2FD;
+      --text: #2d3a4a; --white: #fff;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Nunito', sans-serif; background: var(--pu-bg); color: var(--text); min-height: 100vh; }
+
+    .screen { display: none; min-height: 100vh; flex-direction: column; }
+    .screen.active { display: flex; }
+
+    /* ── HEADER ── */
+    .g-header {
+      background: var(--pu-d); color: white;
+      padding: 13px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+    }
+    .g-header a, .g-back { color: white; text-decoration: none; font-size: 1.45rem; background: none; border: none; cursor: pointer; padding: 2px; line-height: 1; }
+    .g-header h1 { font-size: 1.1rem; font-weight: 800; flex: 1; }
+    .audio-btn {
+      background: rgba(255,255,255,0.18); border: none; color: white;
+      width: 34px; height: 34px; border-radius: 50%; font-size: 1rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .audio-btn.muted { opacity: 0.4; }
+
+    /* ── DIFFICULTY ── */
+    .diff-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36px 20px; gap: 28px; }
+    .diff-heading { text-align: center; }
+    .diff-heading h2 { font-size: 1.9rem; font-weight: 900; color: var(--pu-d); margin-bottom: 6px; }
+    .diff-heading p  { color: #666; font-size: 0.97rem; }
+    .diff-cards { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; }
+    .diff-card {
+      background: white; border-radius: 20px; padding: 28px 24px; width: 185px;
+      text-align: center; cursor: pointer; border: 3px solid transparent;
+      box-shadow: 0 4px 18px rgba(74,20,140,.12); transition: all .2s;
+    }
+    .diff-card:hover { border-color: var(--pu); transform: translateY(-5px); }
+    .d-ico  { font-size: 2.5rem; margin-bottom: 10px; }
+    .d-name { font-size: 1.1rem; font-weight: 900; color: var(--pu-d); margin-bottom: 5px; }
+    .d-desc { font-size: 0.79rem; color: #777; line-height: 1.5; }
+
+    /* ── TUTORIAL ── */
+    .tuto-body { flex: 1; display: flex; align-items: center; justify-content: center; padding: 28px 20px; }
+    .tuto-wrap { background: white; border-radius: 22px; padding: 34px 30px; max-width: 520px; width: 100%; box-shadow: 0 8px 32px rgba(74,20,140,.12); }
+    .tuto-head { text-align: center; margin-bottom: 22px; }
+    .tuto-head .ti { font-size: 2.8rem; margin-bottom: 8px; }
+    .tuto-head h2 { font-size: 1.4rem; font-weight: 900; color: var(--pu-d); margin-bottom: 4px; }
+    .tuto-head p  { color: #666; }
+    .steps { margin-bottom: 20px; }
+    .step { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 11px; }
+    .sn { background: var(--pu); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0; }
+    .st { padding-top: 3px; color: #444; line-height: 1.5; font-size: 0.93rem; }
+    .st strong { color: var(--pu-d); }
+    /* legend */
+    .legend { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 22px; }
+    .leg-item { display: flex; align-items: center; gap: 7px; font-size: 0.82rem; color: #555; }
+    .leg-tile {
+      padding: 5px 12px; border-radius: 9px; font-weight: 900; font-size: 0.9rem;
+      border: 2.5px solid #C5CAE9; background: white;
+    }
+    .leg-tile.cx { background: var(--am-l); border-color: var(--am); color: var(--am-d); }
+    .btn-start {
+      width: 100%; padding: 14px; background: var(--pu); color: white; border: none;
+      border-radius: 13px; font-size: 1.05rem; font-weight: 800; font-family: 'Nunito', sans-serif;
+      cursor: pointer; transition: all .2s;
+    }
+    .btn-start:hover { background: var(--pu-d); transform: translateY(-2px); }
+
+    /* ── PROGRESS BAR ── */
+    .prog-wrap { background: rgba(0,0,0,0.2); height: 6px; flex-shrink: 0; }
+    .prog-fill { height: 100%; background: #FFD700; transition: width .4s ease; }
+
+    /* ── GAME BODY ── */
+    .game-body { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 16px 14px 28px; gap: 14px; overflow-y: auto; }
+
+    .hud-row { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 600px; }
+    .cat-badge { font-size: 0.7rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: var(--pu-l); color: var(--pu-d); }
+    .hud-num   { font-size: 0.82rem; font-weight: 700; color: rgba(0,0,0,0.38); }
+    .hud-score { margin-left: auto; background: white; border-radius: 20px; padding: 5px 14px; font-weight: 800; color: var(--pu-d); font-size: 0.9rem; }
+
+    /* Word card */
+    .word-card {
+      background: white; border-radius: 22px; padding: 22px 18px;
+      width: 100%; max-width: 600px; text-align: center;
+      box-shadow: 0 4px 20px rgba(74,20,140,.1); transition: background .3s, box-shadow .3s;
+    }
+    .word-card.flash-ok { background: var(--gr-l); box-shadow: 0 4px 20px rgba(67,160,71,.3); }
+    .word-card.flash-ng { background: var(--re-l); box-shadow: 0 4px 20px rgba(229,57,53,.2); }
+
+    .word-emoji  { font-size: 3rem; display: block; margin-bottom: 6px; }
+    .word-hint   { font-size: 0.84rem; color: #999; margin-bottom: 12px; font-style: italic; }
+    .speak-btn   {
+      background: var(--pu-l); border: none; border-radius: 10px;
+      padding: 6px 14px; font-size: 0.86rem; font-weight: 700; color: var(--pu-d);
+      cursor: pointer; margin-bottom: 14px; display: inline-flex; align-items: center; gap: 5px;
+    }
+    .speak-btn:hover { background: #CE93D8; }
+    .build-label { font-size: 0.7rem; font-weight: 800; letter-spacing: 1px; color: var(--pu); text-transform: uppercase; margin-bottom: 10px; }
+
+    /* ── SLOTS ── */
+    .slots-row { display: flex; gap: 7px; justify-content: center; flex-wrap: wrap; }
+    .slot {
+      min-width: 66px; height: 62px; padding: 0 8px;
+      border-radius: 13px; border: 3px dashed #C5CAE9; background: #F8F9FF;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.45rem; font-weight: 900; color: #BDBDBD;
+      transition: all .25s; user-select: none;
+    }
+    .slot::before { content: "?"; }
+    .slot.filled  { border-style: solid; border-color: var(--pu); background: var(--pu-bg); color: var(--pu-d); }
+    .slot.filled::before { content: ""; }
+    .slot.correct { border-color: var(--gr); background: var(--gr-l); color: var(--gr-d); }
+    .slot.correct::before { content: ""; }
+    .slot.wrong   { border-color: var(--re); background: var(--re-l); color: var(--re); animation: shake .4s; }
+    .slot.wrong::before { content: ""; }
+    .slot.sz-sm   { min-width: 52px; height: 52px; font-size: 1.15rem; }
+
+    /* ── POOL TILES ── */
+    .pool-section { width: 100%; max-width: 600px; }
+    .pool-label   { font-size: 0.82rem; color: #aaa; font-weight: 700; text-align: center; margin-bottom: 10px; }
+    .pool-row { display: flex; gap: 9px; justify-content: center; flex-wrap: wrap; }
+    .tile {
+      min-width: 66px; height: 62px; padding: 0 10px;
+      border-radius: 13px; border: 3px solid #C5CAE9; background: white;
+      font-size: 1.45rem; font-weight: 900; color: var(--text);
+      cursor: pointer; font-family: 'Nunito', sans-serif;
+      transition: all .2s; box-shadow: 0 3px 10px rgba(0,0,0,.07);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tile:hover:not(:disabled) { border-color: var(--pu); background: var(--pu-bg); transform: translateY(-3px); box-shadow: 0 6px 16px rgba(74,20,140,.18); }
+    .tile.cx { background: var(--am-l); border-color: var(--am); color: var(--am-d); }
+    .tile.cx:hover:not(:disabled) { background: #FFE0B2; border-color: var(--am-d); }
+    .tile.sz-sm { min-width: 52px; height: 52px; font-size: 1.15rem; }
+    .tile:disabled { opacity: 0.28; cursor: default; transform: none !important; box-shadow: none; }
+    .tile.pop { animation: pop .22s ease; }
+
+    /* Erase btn */
+    .erase-btn {
+      background: #ECEFF1; border: 2px solid #B0BEC5; border-radius: 12px;
+      padding: 9px 18px; font-size: 0.88rem; font-weight: 800; font-family: 'Nunito', sans-serif;
+      color: #546E7A; cursor: pointer; transition: all .2s; display: none;
+    }
+    .erase-btn:hover { background: #CFD8DC; border-color: #90A4AE; }
+
+    /* Feedback */
+    .feedback { display: none; text-align: center; font-size: 1rem; font-weight: 800; padding: 10px 18px; border-radius: 12px; width: 100%; max-width: 600px; }
+    .feedback.show   { display: block; }
+    .feedback.ok     { background: var(--gr-l); color: var(--gr-d); }
+    .feedback.ng     { background: var(--am-l); color: var(--am-d); }
+    .feedback.reveal { background: var(--bl-l); color: var(--bl); }
+
+    /* Next btn */
+    .next-btn {
+      display: none; width: 100%; max-width: 600px;
+      padding: 15px; background: var(--pu); color: white; border: none;
+      border-radius: 15px; font-size: 1.05rem; font-weight: 800;
+      font-family: 'Nunito', sans-serif; cursor: pointer; transition: all .2s;
+    }
+    .next-btn.show { display: block; }
+    .next-btn:hover { background: var(--pu-d); transform: translateY(-2px); }
+
+    /* ── VICTORY ── */
+    .vic-body { flex: 1; display: flex; align-items: center; justify-content: center; padding: 28px 20px; }
+    .vic-card { background: white; border-radius: 26px; padding: 38px 28px; max-width: 460px; width: 100%; text-align: center; box-shadow: 0 8px 40px rgba(74,20,140,.14); }
+    .vic-emoji { font-size: 68px; display: block; margin-bottom: 12px; }
+    .vic-card h2  { font-size: 1.8rem; font-weight: 900; color: var(--pu-d); margin-bottom: 6px; }
+    .vic-card > p { color: #708090; margin-bottom: 18px; }
+    .vic-stars    { font-size: 44px; letter-spacing: 6px; margin-bottom: 20px; }
+    .vic-stats    { display: flex; gap: 10px; justify-content: center; margin-bottom: 22px; flex-wrap: wrap; }
+    .v-stat       { background: var(--pu-bg); border-radius: 12px; padding: 12px 18px; }
+    .v-num        { font-size: 26px; font-weight: 900; color: var(--pu-d); display: block; }
+    .v-lbl        { font-size: 11px; color: #708090; }
+    .vic-btns     { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .btn  { border: none; border-radius: 12px; padding: 12px 24px; font-size: 15px; font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif; transition: all .2s; }
+    .btn-primary { background: var(--pu); color: white; }
+    .btn-primary:hover { background: var(--pu-d); transform: translateY(-2px); }
+    .btn-outline { background: transparent; color: var(--pu); border: 2px solid var(--pu); }
+    .btn-outline:hover { background: var(--pu-bg); }
+    .btn-green   { background: var(--gr); color: white; }
+    .btn-green:hover { background: var(--gr-d); transform: translateY(-2px); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes pop   { 0%{transform:scale(1)} 45%{transform:scale(1.28)} 100%{transform:scale(1)} }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+    @keyframes bounce-in { 0%{transform:scale(0.7);opacity:0} 60%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+    .slot.filled { animation: bounce-in .22s ease; }
+
+    @media (max-width: 480px) {
+      .diff-card { width: 100%; max-width: 270px; }
+      .tile, .slot { min-width: 54px; height: 54px; font-size: 1.2rem; }
+      .tile.sz-sm, .slot.sz-sm { min-width: 44px; height: 44px; font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ SCREEN 1: DIFICULDADE ══ -->
+<div class="screen active" id="sDiff">
+  <div class="g-header">
+    <a href="../dashboard.html">←</a>
+    <h1>🏭 Fábrica de Palavras</h1>
+  </div>
+  <div class="diff-body">
+    <div class="diff-heading">
+      <h2>Escolha a Dificuldade</h2>
+      <p>Monte as sílabas e forme a palavra certa!</p>
+    </div>
+    <div class="diff-cards">
+      <div class="diff-card" onclick="startGame('facil')">
+        <div class="d-ico">🌟</div>
+        <div class="d-name">Fácil</div>
+        <div class="d-desc">2 sílabas<br>Com imagem e dica<br>4 peças</div>
+      </div>
+      <div class="diff-card" onclick="startGame('medio')">
+        <div class="d-ico">🔥</div>
+        <div class="d-name">Médio</div>
+        <div class="d-desc">3 sílabas<br>Com imagem<br>5 peças</div>
+      </div>
+      <div class="diff-card" onclick="startGame('dificil')">
+        <div class="d-ico">💎</div>
+        <div class="d-name">Difícil</div>
+        <div class="d-desc">3–4 sílabas<br>Sem imagem<br>6–7 peças</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 2: TUTORIAL ══ -->
+<div class="screen" id="sTuto">
+  <div class="g-header">
+    <a href="#" onclick="showScreen('sDiff');return false;">←</a>
+    <h1>🏭 Como Jogar</h1>
+  </div>
+  <div class="tuto-body">
+    <div class="tuto-wrap">
+      <div class="tuto-head">
+        <div class="ti">🏭</div>
+        <h2>Fábrica de Palavras</h2>
+        <p>Monte as sílabas para formar a palavra!</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="sn">1</div>
+          <div class="st">Veja o <strong>emoji</strong> e ouça a palavra clicando em <strong>🔊 Ouvir</strong>.</div>
+        </div>
+        <div class="step">
+          <div class="sn">2</div>
+          <div class="st">Clique nas <strong>peças de sílabas</strong> na ordem certa para preencher os espaços.</div>
+        </div>
+        <div class="step">
+          <div class="sn">3</div>
+          <div class="st">Peças em <strong style="color:var(--am-d)">laranja</strong> têm <strong>sílabas complexas</strong> (LH, NH, BR, FR…). Fique atento!</div>
+        </div>
+        <div class="step">
+          <div class="sn">4</div>
+          <div class="st">Errou? Use <strong>⌫ Apagar</strong> para desfazer a última peça e tentar de novo.</div>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="leg-item"><span class="leg-tile">MA</span> Sílaba normal</div>
+        <div class="leg-item"><span class="leg-tile cx">NHO</span> Sílaba complexa</div>
+      </div>
+      <button class="btn-start" onclick="beginGame()">Montar! 🏭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 3: JOGO ══ -->
+<div class="screen" id="sGame">
+  <div class="g-header">
+    <button class="g-back" onclick="goBack()">←</button>
+    <h1>🏭 Fábrica de Palavras</h1>
+    <button class="audio-btn" id="audioBtn" onclick="toggleAudio()">🔊</button>
+  </div>
+  <div class="prog-wrap"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  <div class="game-body">
+
+    <div class="hud-row">
+      <span class="cat-badge" id="catBadge"></span>
+      <span class="hud-num"   id="wordNum"></span>
+      <span class="hud-score" id="scoreDisp">⭐ 0</span>
+    </div>
+
+    <div class="word-card" id="wordCard">
+      <span class="word-emoji" id="wordEmoji"></span>
+      <p class="word-hint" id="wordHint"></p>
+      <button class="speak-btn" onclick="speakCurrent()">🔊 Ouvir a palavra</button>
+      <p class="build-label">Monte a palavra:</p>
+      <div class="slots-row" id="slotsRow"></div>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <button class="erase-btn" id="eraseBtn" onclick="eraseLast()">⌫ Apagar última</button>
+
+    <div class="pool-section">
+      <p class="pool-label">Clique nas sílabas na ordem certa ↓</p>
+      <div class="pool-row" id="poolRow"></div>
+    </div>
+
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Próxima palavra ▶</button>
+
+  </div>
+</div>
+
+<!-- ══ SCREEN 4: VITÓRIA ══ -->
+<div class="screen" id="sVic">
+  <div class="g-header">
+    <a href="../dashboard.html">←</a>
+    <h1>🏭 Fábrica de Palavras</h1>
+  </div>
+  <div class="vic-body">
+    <div class="vic-card">
+      <span class="vic-emoji" id="vicEmoji">🏆</span>
+      <h2 id="vicTitle">Parabéns!</h2>
+      <p id="vicMsg">Você montou todas as palavras!</p>
+      <div class="vic-stars" id="vicStars">⭐⭐⭐</div>
+      <div class="vic-stats">
+        <div class="v-stat"><span class="v-num" id="vWords">0</span><span class="v-lbl">Palavras</span></div>
+        <div class="v-stat"><span class="v-num" id="vScore">0</span><span class="v-lbl">Pontos</span></div>
+        <div class="v-stat"><span class="v-num" id="vFirst">0</span><span class="v-lbl">De 1ª vez</span></div>
+      </div>
+      <div class="vic-btns">
+        <button class="btn btn-outline" onclick="showScreen('sDiff')">Mudar Nível</button>
+        <button class="btn btn-green"   onclick="beginGame()">Jogar Novamente</button>
+        <button class="btn btn-primary" onclick="location.href='../dashboard.html'">Início</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// BANCO DE PALAVRAS
+// w=palavra, e=emoji, hint=dica(fácil), s=sílabas corretas,
+// dist=sílabas distratoras, cat=categoria
+// ═══════════════════════════════════════════════════
+const DB = {
+  facil: [
+    { w:"FOLHA",  e:"🍃", hint:"Parte verde da planta",           s:["FO","LHA"],    dist:["NHO","BI"],   cat:"LH"    },
+    { w:"FILHO",  e:"👦", hint:"O menino da família",              s:["FI","LHO"],    dist:["NHA","CA"],   cat:"LH"    },
+    { w:"MILHO",  e:"🌽", hint:"Cereal amarelo das pipocas",       s:["MI","LHO"],    dist:["NHO","FO"],   cat:"LH"    },
+    { w:"BANHO",  e:"🛁", hint:"Tomamos com água e sabão",         s:["BA","NHO"],    dist:["LHA","FO"],   cat:"NH"    },
+    { w:"NINHO",  e:"🪺", hint:"Onde os passarinhos moram",        s:["NI","NHO"],    dist:["LHO","BI"],   cat:"NH"    },
+    { w:"PRATO",  e:"🍽️", hint:"Usamos para servir a comida",     s:["PRA","TO"],    dist:["NHO","MI"],   cat:"PR"    },
+    { w:"GLOBO",  e:"🌍", hint:"Formato redondo do planeta Terra", s:["GLO","BO"],    dist:["NHA","PRA"],  cat:"GL"    },
+    { w:"FRUTA",  e:"🍓", hint:"Alimento doce que vem das plantas",s:["FRU","TA"],    dist:["LHA","NHO"],  cat:"FR"    },
+    { w:"GRAMA",  e:"🌿", hint:"O verde que cobre o jardim",       s:["GRA","MA"],    dist:["NHO","FO"],   cat:"GR"    },
+    { w:"BRINCO", e:"💍", hint:"Ornamento usado na orelha",        s:["BRIN","CO"],   dist:["LHA","NHO"],  cat:"BR"    },
+  ],
+  medio: [
+    { w:"COELHO",  e:"🐇", hint:"", s:["CO","E","LHO"],    dist:["NHO","BI"],  cat:"LH"    },
+    { w:"ABELHA",  e:"🐝", hint:"", s:["A","BE","LHA"],    dist:["NHO","MI"],  cat:"LH"    },
+    { w:"ESPELHO", e:"🪞", hint:"", s:["ES","PE","LHO"],   dist:["NHA","BI"],  cat:"LH"    },
+    { w:"VERMELHO",e:"🔴", hint:"", s:["VER","ME","LHO"],  dist:["NHA","FO"],  cat:"LH"    },
+    { w:"CARINHO", e:"💕", hint:"", s:["CA","RI","NHO"],   dist:["LHO","BI"],  cat:"NH"    },
+    { w:"CAMINHO", e:"🛤️", hint:"", s:["CA","MI","NHO"],   dist:["LHO","FO"],  cat:"NH"    },
+    { w:"MINHOCA", e:"🪱", hint:"", s:["MI","NHO","CA"],   dist:["LHA","FO"],  cat:"NH"    },
+    { w:"TRABALHO",e:"💼", hint:"", s:["TRA","BA","LHO"],  dist:["NHA","FO"],  cat:"TR+LH" },
+    { w:"AGULHA",  e:"🧵", hint:"", s:["A","GU","LHA"],    dist:["NHO","BI"],  cat:"LH"    },
+    { w:"COBRINHA",e:"🐍", hint:"", s:["CO","BRI","NHA"],  dist:["LHO","BI"],  cat:"BR+NH" },
+  ],
+  dificil: [
+    { w:"EMBRULHO",   e:"", hint:"", s:["EM","BRU","LHO"],      dist:["NHA","FO","BI"],   cat:"BR+LH" },
+    { w:"MADRINHA",   e:"", hint:"", s:["MA","DRI","NHA"],       dist:["LHO","BI","FO"],   cat:"DR+NH" },
+    { w:"PADRINHO",   e:"", hint:"", s:["PA","DRI","NHO"],       dist:["LHA","BI","FO"],   cat:"DR+NH" },
+    { w:"LAGARTINHO", e:"", hint:"", s:["LA","GAR","TI","NHO"],  dist:["LHA","FO","BI"],   cat:"NH"    },
+    { w:"ESPELHINHO", e:"", hint:"", s:["ES","PE","LHI","NHO"],  dist:["BI","FO","CA"],    cat:"LH+NH" },
+    { w:"CARINHOSO",  e:"", hint:"", s:["CA","RI","NHO","SO"],   dist:["LHA","FO","BI"],   cat:"NH"    },
+    { w:"BORRACHA",   e:"", hint:"", s:["BOR","RA","CHA"],       dist:["NHO","LHO","FO"],  cat:"CH"    },
+    { w:"CHAMINÉ",    e:"", hint:"", s:["CHA","MI","NÉ"],        dist:["NHO","LHO","FO"],  cat:"CH"    },
+  ],
+};
+
+const CFG = {
+  facil:   { count:5, showEmoji:true,  showHint:true,  autoSpeak:true  },
+  medio:   { count:6, showEmoji:true,  showHint:false, autoSpeak:false },
+  dificil: { count:8, showEmoji:false, showHint:false, autoSpeak:false },
+};
+
+// ═══════════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════════
+let levelKey, cfg, questions, qIdx, score, firstTry;
+let placed = [];     // sílabas colocadas nos slots
+let tileEls = {};    // id → <button> elemento do tile no pool
+let answered = false;
+let audioEnabled = true;
+let checkTimer = null;
+
+// ═══════════════════════════════════════════════════
+// UTILITÁRIOS
+// ═══════════════════════════════════════════════════
+function shuffle(a) {
+  const b = [...a];
+  for (let i = b.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [b[i], b[j]] = [b[j], b[i]];
+  }
+  return b;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function isComplex(syl) {
+  return /LH|NH|CH|RR|SS|BR|CR|DR|FR|GR|PR|TR|BL|CL|FL|GL|PL/i.test(syl);
+}
+
+// ═══════════════════════════════════════════════════
+// ÁUDIO
+// ═══════════════════════════════════════════════════
+const ACtx = window.AudioContext || window.webkitAudioContext;
+let actx;
+function getACtx() { if (!actx) actx = new ACtx(); return actx; }
+
+function beep(freq, dur, vol = 0.1) {
+  if (!audioEnabled) return;
+  try {
+    const c = getACtx(), o = c.createOscillator(), g = c.createGain();
+    o.connect(g); g.connect(c.destination);
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+    o.start(); o.stop(c.currentTime + dur);
+  } catch(e) {}
+}
+function playPlace() { beep(660, 0.05, 0.08); }
+function playOk()    { beep(523,.07); setTimeout(()=>beep(659,.07),80); setTimeout(()=>beep(784,.15),160); }
+function playNg()    { beep(300,.1);  setTimeout(()=>beep(220,.15),120); }
+function playWin()   { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.18),i*110)); }
+function playErase() { beep(400, 0.06, 0.07); }
+
+function speakWord(word) {
+  if (!audioEnabled) return;
+  try {
+    if (!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(word.toLowerCase());
+    u.lang = 'pt-BR'; u.rate = 0.7; u.pitch = 1.1;
+    speechSynthesis.speak(u);
+  } catch(e) {}
+}
+function speakCurrent() { speakWord(questions[qIdx].w); }
+
+function toggleAudio() {
+  audioEnabled = !audioEnabled;
+  const btn = document.getElementById('audioBtn');
+  btn.textContent = audioEnabled ? '🔊' : '🔇';
+  btn.classList.toggle('muted', !audioEnabled);
+}
+
+// ═══════════════════════════════════════════════════
+// CARREGAR QUESTÃO
+// ═══════════════════════════════════════════════════
+function loadQuestion(idx) {
+  placed   = [];
+  tileEls  = {};
+  answered = false;
+  if (checkTimer) { clearTimeout(checkTimer); checkTimer = null; }
+
+  const q   = questions[idx];
+  const tot = questions.length;
+  const sz  = q.s.length >= 4 ? 'sz-sm' : '';
+
+  // HUD
+  document.getElementById('progFill').style.width  = `${(idx / tot) * 100}%`;
+  document.getElementById('wordNum').textContent    = `${idx + 1} de ${tot}`;
+  document.getElementById('catBadge').textContent   = q.cat;
+  document.getElementById('scoreDisp').textContent  = `⭐ ${score}`;
+
+  // Emoji + hint
+  const emojiEl = document.getElementById('wordEmoji');
+  emojiEl.textContent   = (cfg.showEmoji && q.e) ? q.e : '';
+  emojiEl.style.display = (cfg.showEmoji && q.e) ? 'block' : 'none';
+
+  const hintEl = document.getElementById('wordHint');
+  hintEl.textContent   = (cfg.showHint && q.hint) ? q.hint : '';
+  hintEl.style.display = (cfg.showHint && q.hint) ? 'block' : 'none';
+
+  // Card reset
+  document.getElementById('wordCard').className = 'word-card';
+
+  // Feedback reset
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.textContent = '';
+
+  // Next + erase reset
+  document.getElementById('nextBtn').classList.remove('show');
+  document.getElementById('eraseBtn').style.display = 'none';
+
+  // ── SLOTS ──
+  const slotsRow = document.getElementById('slotsRow');
+  slotsRow.innerHTML = '';
+  for (let i = 0; i < q.s.length; i++) {
+    const slot = document.createElement('div');
+    slot.className = `slot ${sz}`;
+    slot.id = `slot-${i}`;
+    slotsRow.appendChild(slot);
+  }
+
+  // ── TILES (corretas + distratoras) ──
+  const allSyls = shuffle([...q.s, ...q.dist]);
+  const poolRow = document.getElementById('poolRow');
+  poolRow.innerHTML = '';
+
+  allSyls.forEach((syl, i) => {
+    const btn = document.createElement('button');
+    const cx  = isComplex(syl) ? 'cx' : '';
+    btn.className  = `tile ${cx} ${sz}`;
+    btn.textContent = syl;
+    btn.dataset.syl = syl;
+    btn.dataset.id  = i;
+    btn.onclick = () => onTileClick(btn);
+    tileEls[i] = btn;
+    poolRow.appendChild(btn);
+  });
+
+  // auto-speak
+  if (cfg.autoSpeak) setTimeout(() => speakWord(q.w), 500);
+}
+
+// ═══════════════════════════════════════════════════
+// CLICK NUMA PEÇA
+// ═══════════════════════════════════════════════════
+function onTileClick(btn) {
+  if (answered || btn.disabled) return;
+
+  const q      = questions[qIdx];
+  const slotIdx = placed.length;
+
+  if (slotIdx >= q.s.length) return; // todos slots cheios
+
+  // Animação no tile
+  btn.classList.add('pop');
+  setTimeout(() => btn.classList.remove('pop'), 250);
+
+  // Desabilita tile
+  btn.disabled = true;
+  playPlace();
+
+  // Preenche slot
+  const slot = document.getElementById(`slot-${slotIdx}`);
+  slot.textContent = btn.dataset.syl;
+  slot.classList.add('filled');
+
+  placed.push({ syl: btn.dataset.syl, tileId: btn.dataset.id });
+
+  // Mostra botão apagar
+  document.getElementById('eraseBtn').style.display = 'inline-block';
+
+  // Todos os slots preenchidos → verificar
+  if (placed.length === q.s.length) {
+    document.getElementById('eraseBtn').style.display = 'none';
+    checkTimer = setTimeout(checkAnswer, 350);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// APAGAR ÚLTIMA PEÇA
+// ═══════════════════════════════════════════════════
+function eraseLast() {
+  if (answered || placed.length === 0) return;
+  playErase();
+
+  const last    = placed.pop();
+  const slotIdx = placed.length;
+  const slot    = document.getElementById(`slot-${slotIdx}`);
+  slot.textContent = '';
+  slot.classList.remove('filled', 'correct', 'wrong');
+
+  // Reabilita tile
+  const btn = tileEls[last.tileId];
+  if (btn) btn.disabled = false;
+
+  if (placed.length === 0) {
+    document.getElementById('eraseBtn').style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// VERIFICAR RESPOSTA
+// ═══════════════════════════════════════════════════
+function checkAnswer() {
+  const q       = questions[qIdx];
+  const correct = placed.every((p, i) => p.syl === q.s[i]);
+
+  if (correct) {
+    handleCorrect(q);
+  } else {
+    handleWrong(q);
+  }
+}
+
+function handleCorrect(q) {
+  answered = true;
+
+  // Slots ficam verdes
+  for (let i = 0; i < q.s.length; i++) {
+    const slot = document.getElementById(`slot-${i}`);
+    slot.classList.remove('filled');
+    slot.classList.add('correct');
+  }
+
+  // Word card flash
+  document.getElementById('wordCard').classList.add('flash-ok');
+
+  // Pontuação
+  score++;
+  firstTry++;
+  document.getElementById('scoreDisp').textContent = `⭐ ${score}`;
+
+  showFeedback('ok', `✓ Muito bem! Palavra: ${q.w} 🎉`);
+  playOk();
+  speakWord(q.w);
+
+  // Desabilita todos os tiles restantes
+  Object.values(tileEls).forEach(b => { b.disabled = true; });
+
+  setTimeout(() => document.getElementById('nextBtn').classList.add('show'), 700);
+}
+
+function handleWrong(q) {
+  // Slots ficam vermelhos + shake
+  for (let i = 0; i < q.s.length; i++) {
+    const slot = document.getElementById(`slot-${i}`);
+    slot.classList.remove('filled');
+    slot.classList.add('wrong');
+  }
+  document.getElementById('wordCard').classList.add('flash-ng');
+  showFeedback('ng', `Quase! Tente outra ordem 💪`);
+  playNg();
+
+  // Reset após animação
+  setTimeout(() => {
+    // Limpa slots
+    for (let i = 0; i < q.s.length; i++) {
+      const slot = document.getElementById(`slot-${i}`);
+      slot.textContent = '';
+      slot.classList.remove('wrong', 'filled');
+    }
+    // Reabilita todos os tiles
+    Object.values(tileEls).forEach(b => { b.disabled = false; });
+    placed = [];
+    document.getElementById('wordCard').classList.remove('flash-ng');
+    const fb = document.getElementById('feedback');
+    fb.className = 'feedback'; fb.textContent = '';
+  }, 1100);
+}
+
+function showFeedback(type, msg) {
+  const fb = document.getElementById('feedback');
+  fb.className = `feedback show ${type}`;
+  fb.textContent = msg;
+}
+
+// ═══════════════════════════════════════════════════
+// PRÓXIMA / VITÓRIA
+// ═══════════════════════════════════════════════════
+function nextQuestion() {
+  qIdx++;
+  if (qIdx >= questions.length) showVictory();
+  else loadQuestion(qIdx);
+}
+
+function showVictory() {
+  const pct = firstTry / questions.length;
+  let stars, emoji, title, msg;
+  if      (pct >= 0.8) { stars='⭐⭐⭐'; emoji='🏆'; title='Mestre das Sílabas!'; msg='Você montou todas as palavras!'; }
+  else if (pct >= 0.5) { stars='⭐⭐';   emoji='🎉'; title='Muito Bem!';           msg='Continue praticando!'; }
+  else                 { stars='⭐';     emoji='💪'; title='Bom Esforço!';         msg='Tente novamente e vai melhorar!'; }
+
+  document.getElementById('vicEmoji').textContent = emoji;
+  document.getElementById('vicTitle').textContent = title;
+  document.getElementById('vicMsg').textContent   = msg;
+  document.getElementById('vicStars').textContent = stars;
+  document.getElementById('vWords').textContent   = questions.length;
+  document.getElementById('vScore').textContent   = score;
+  document.getElementById('vFirst').textContent   = firstTry;
+
+  playWin();
+  document.getElementById('progFill').style.width = '100%';
+  showScreen('sVic');
+}
+
+// ═══════════════════════════════════════════════════
+// FLOW
+// ═══════════════════════════════════════════════════
+function startGame(key) {
+  levelKey = key;
+  cfg      = CFG[key];
+  showScreen('sTuto');
+}
+
+function beginGame() {
+  score    = 0;
+  firstTry = 0;
+  qIdx     = 0;
+  questions = shuffle([...DB[levelKey]]).slice(0, cfg.count);
+  showScreen('sGame');
+  loadQuestion(0);
+}
+
+function goBack() {
+  window.speechSynthesis && speechSynthesis.cancel();
+  showScreen('sDiff');
+}
+</script>
+<script src="../nipo.js"></script>
+</body>
+</html>

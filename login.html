@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EducaPlay - Entrar</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+</head>
+<body class="auth-page">
+
+  <div class="auth-container">
+
+    <!-- LEFT PANEL -->
+    <div class="auth-left">
+
+      <a href="index.html" class="logo">
+        <span class="logo-icon">🎮</span>
+        <span class="logo-text">Educa<span class="logo-highlight">Play</span></span>
+      </a>
+
+      <div class="auth-left-content">
+        <h2>Aprender é mais<br><span class="auth-hl">divertido</span> aqui!</h2>
+        <p>Jogos educativos interativos para crianças. Desenvolvimento cognitivo através da brincadeira!</p>
+        <div class="auth-features">
+          <div class="auth-feature"><span>🎯</span> 10 jogos educativos</div>
+          <div class="auth-feature"><span>🏆</span> Conquistas e recompensas</div>
+          <div class="auth-feature"><span>♿</span> Acessível para todos</div>
+        </div>
+      </div>
+
+      <div class="auth-game-preview">
+        <div class="preview-card"><span class="pc-emoji">🃏</span><span>Memória</span></div>
+        <div class="preview-card"><span class="pc-emoji">⚖️</span><span>Balança</span></div>
+        <div class="preview-card"><span class="pc-emoji">🍕</span><span>Pizzaria</span></div>
+        <div class="preview-card"><span class="pc-emoji">🎮</span><span>Labirinto</span></div>
+        <div class="preview-card"><span class="pc-emoji">✏️</span><span>Trocas</span></div>
+        <div class="preview-card"><span class="pc-emoji">🏭</span><span>Fábrica</span></div>
+      </div>
+
+      <div class="auth-deco">
+        <span class="deco-star">⭐</span>
+        <span class="deco-star">✨</span>
+        <span class="deco-star">🌟</span>
+        <span class="deco-star">💫</span>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="auth-right">
+
+      <!-- Logo mobile only -->
+      <a href="index.html" class="auth-mobile-logo">
+        <span>🎮</span>
+        <span>Educa<strong>Play</strong></span>
+      </a>
+
+      <!-- TABS -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login', this)">Entrar</button>
+        <button class="auth-tab" onclick="switchTab('cadastro', this)">Cadastrar</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <div class="auth-form" id="loginForm">
+        <h3>Acessar minha conta</h3>
+        <p class="form-subtitle">Digite seus dados para continuar</p>
+
+        <form onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="loginEmail">E-mail</label>
+            <div class="input-wrapper">
+              <span class="input-icon">📧</span>
+              <input type="email" id="loginEmail" placeholder="seu@email.com" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Senha</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="loginPassword" placeholder="••••••••" required />
+              <button type="button" class="toggle-password" onclick="togglePassword('loginPassword')">👁</button>
+            </div>
+          </div>
+          <div class="form-row">
+            <label class="checkbox-label">
+              <input type="checkbox" /> Lembrar de mim
+            </label>
+            <a href="#" class="forgot-link">Esqueci minha senha</a>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full btn-large">Entrar →</button>
+        </form>
+
+        <div class="auth-divider"><span>ou</span></div>
+        <button class="btn btn-social">
+          <img src="https://www.google.com/favicon.ico" width="18" alt="Google" /> Entrar com Google
+        </button>
+
+        <p class="auth-switch-link">Não tem conta? <a href="#" onclick="switchTabByName('cadastro')">Cadastre-se grátis</a></p>
+      </div>
+
+      <!-- CADASTRO FORM -->
+      <div class="auth-form hidden" id="cadastroForm">
+        <h3>Criar minha conta</h3>
+        <p class="form-subtitle">Comece sua aventura hoje mesmo</p>
+
+        <form onsubmit="handleCadastro(event)">
+          <div class="form-group">
+            <label for="cadNome">Nome completo</label>
+            <div class="input-wrapper">
+              <span class="input-icon">👤</span>
+              <input type="text" id="cadNome" placeholder="Seu nome" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="cadEmail">E-mail</label>
+            <div class="input-wrapper">
+              <span class="input-icon">📧</span>
+              <input type="email" id="cadEmail" placeholder="seu@email.com" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="cadPassword">Senha</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="cadPassword" placeholder="Mínimo 8 caracteres" required oninput="updateStrength(this.value)" />
+              <button type="button" class="toggle-password" onclick="togglePassword('cadPassword')">👁</button>
+            </div>
+            <div class="password-strength" id="pwStrength"><div class="ps-bar"></div></div>
+          </div>
+          <div class="form-group">
+            <label for="cadConfirm">Confirmar senha</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="cadConfirm" placeholder="Repita a senha" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" required /> Concordo com os <a href="#">Termos de Uso</a> e <a href="#">Política de Privacidade</a>
+            </label>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full btn-large">Criar Conta Grátis 🚀</button>
+        </form>
+
+        <div class="auth-divider"><span>ou</span></div>
+        <button class="btn btn-social">
+          <img src="https://www.google.com/favicon.ico" width="18" alt="Google" /> Continuar com Google
+        </button>
+
+        <p class="auth-switch-link">Já tem conta? <a href="#" onclick="switchTabByName('login')">Entrar</a></p>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="nipo.js"></script>
+  <script>
+    window.addEventListener('load', function () {
+      nipoWelcome('Olá! Faça login e vamos estudar juntos! 🌟<br>Eu acredito em você!');
+    });
+
+    function switchTab(tab, el) {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.auth-form').forEach(f => f.classList.add('hidden'));
+      el.classList.add('active');
+      document.getElementById(tab === 'login' ? 'loginForm' : 'cadastroForm').classList.remove('hidden');
+    }
+
+    function switchTabByName(tab) {
+      const idx = tab === 'cadastro' ? 1 : 0;
+      const btn = document.querySelectorAll('.auth-tab')[idx];
+      switchTab(tab, btn);
+    }
+
+    if (window.location.hash === '#cadastro') switchTabByName('cadastro');
+
+    function togglePassword(id) {
+      const input = document.getElementById(id);
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function updateStrength(val) {
+      const bar = document.querySelector('#pwStrength .ps-bar');
+      let score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      const colors = ['#e74c3c', '#e67e22', '#f1c40f', '#27ae60'];
+      const widths  = ['25%', '50%', '75%', '100%'];
+      bar.style.width = val.length ? widths[score - 1] || '10%' : '0%';
+      bar.style.background = val.length ? colors[score - 1] || '#e74c3c' : 'transparent';
+    }
+
+    function showToast(msg, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = `toast ${type} show`;
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      showToast('✅ Entrando...');
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+    }
+
+    function handleCadastro(e) {
+      e.preventDefault();
+      const pwd = document.getElementById('cadPassword').value;
+      const confirm = document.getElementById('cadConfirm').value;
+      if (pwd !== confirm) { showToast('As senhas não coincidem!', 'error'); return; }
+      if (pwd.length < 8) { showToast('Senha deve ter pelo menos 8 caracteres!', 'error'); return; }
+      showToast('🎉 Conta criada com sucesso!');
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+    }
+  </script>
+</body>
+</html>

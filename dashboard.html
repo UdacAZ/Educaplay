@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EducaPlay - Meus Jogos</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+</head>
+<body class="dashboard-page">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">🎮</span>
+      <span class="logo-text">Educa<span class="logo-highlight">Play</span></span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-cat="todos" onclick="filterGames('todos')">
+        <span class="nav-icon">🏠</span><span class="nav-label">Início</span>
+      </a>
+      <a href="#" class="nav-item" data-cat="matematica" onclick="filterGames('matematica')">
+        <span class="nav-icon">🔢</span><span class="nav-label">Matemática</span>
+      </a>
+      <a href="#" class="nav-item" data-cat="portugues" onclick="filterGames('portugues')">
+        <span class="nav-icon">📝</span><span class="nav-label">Português</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="user-avatar">👦</div>
+        <div class="user-info">
+          <strong>Olá, Aluno!</strong>
+          <span>Plano Mensal</span>
+        </div>
+      </div>
+      <a href="index.html" class="nav-item logout">
+        <span class="nav-icon">🚪</span><span class="nav-label">Sair</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- OVERLAY MOBILE -->
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- MAIN CONTENT -->
+  <main class="dashboard-main">
+
+    <!-- TOP BAR -->
+    <header class="dashboard-header">
+      <div class="header-left">
+        <button class="hamburger-dash" onclick="toggleSidebar()">☰</button>
+        <div class="search-bar">
+          <span>🔍</span>
+          <input type="text" placeholder="Buscar jogos..." oninput="searchGames(this.value)" />
+        </div>
+      </div>
+      <div class="header-right">
+        <a href="perfil.html" class="header-avatar" title="Meu Perfil">👦</a>
+      </div>
+    </header>
+
+    <!-- WELCOME BANNER -->
+    <div class="welcome-banner">
+      <div class="welcome-text">
+        <h2>Olá, Aluno! 👋</h2>
+        <p>Pronto para aprender algo novo hoje? Temos <strong>10 jogos</strong> disponíveis para você!</p>
+      </div>
+      <div class="welcome-deco">
+        <span>🌟</span>
+        <span>📚</span>
+        <span>🎯</span>
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <button class="filter-chip active" data-cat="todos" onclick="filterGames('todos')">🏠 Todos</button>
+      <button class="filter-chip" data-cat="matematica" onclick="filterGames('matematica')">🔢 Matemática</button>
+      <button class="filter-chip" data-cat="portugues" onclick="filterGames('portugues')">📝 Português</button>
+    </div>
+
+    <!-- ALL GAMES -->
+    <section class="dashboard-section">
+      <div class="section-title-row">
+        <h3 class="section-title" id="gamesTitle">Todos os Jogos</h3>
+        <span class="games-count" id="gamesCount">10 jogos</span>
+      </div>
+      <div class="games-grid-dash" id="gamesGrid">
+
+        <div class="game-tile" data-category="matematica" data-name="memoria matematica">
+          <div class="tile-thumb" style="background: linear-gradient(135deg, #7EC8E3, #4A9EC4);">
+            <span>🃏</span>
+            <div class="tile-stars">⭐⭐⭐</div>
+          </div>
+          <div class="tile-info">
+            <span class="gcd-tag mat">Matemática</span>
+            <h4>Memória Matemática</h4>
+            <p>Combine operações com seus resultados</p>
+          </div>
+          <button class="btn btn-primary tile-btn" onclick="openGame('aventura-numeros')">Jogar</button>
+        </div>
+
+        <div class="game-tile" data-category="matematica" data-name="balanca magica">
+          <div class="tile-thumb" style="background: linear-gradient(135deg, #B8E4F2, #5BA4CF);">
+            <span>⚖️</span>
+            <div class="tile-stars">⭐⭐⭐</div>
+          </div>
+          <div class="tile-info">
+            <span class="gcd-tag mat">Matemática</span>
+            <h4>Balança Mágica</h4>
+            <p>Equilibre a balança descobrindo o número</p>
+          </div>
+          <button class="btn btn-primary tile-btn" onclick="openGame('quiz-fracoes')">Jogar</button>
+        </div>
+
+        <div class="game-tile" data-category="matematica" data-name="caca ao numero">
+          <div class="tile-thumb" style="background: linear-gradient(135deg, #FFD6A5, #FF7F50);">
+            <span>🎯</span>
+            <div class="tile-stars">⭐⭐</div>
+          </div>
+          <div class="tile-info">
+            <span class="gcd-tag mat">Matemática</span>
+            <h4>Caça ao Número</h4>
+            <p>Encontre a resposta certa entre as bolhas</p>
+          </div>
+          <button class="btn btn-primary tile-btn" onclick="openGame('caca-numero')">Jogar</button>
+        </div>
+
+        <div class="game-tile" data-category="matematica" data-name="pizzaria da divisao">
+          <div class="tile-thumb" style="background: linear-gradient(135deg, #FFCC80, #E65100);">
+            <span>🍕</span>
+            <div class="tile-stars">⭐⭐⭐</div>
+          </div>
+          <div class="tile-info">
+            <span class="gcd-tag mat">Matemática</span>
+            <h4>Pizzaria da Divisão</h4>
+            <p>Divida as pizzas e aprenda divisão</p>
+          </div>
+          <button class="btn btn-primary tile-btn" onclick="openGame('pizzaria-divisao')">Jogar</button>
+        </div>
+
+        <div class="game-tile" data-category="matematica" data-name="mercado do aluno">
+          <div class="tile-thumb" style="background: linear-gradient(135deg, #A5D6A7, #388E3C);">
+            <span>🛒</span>
+            <div class="tile-stars">⭐⭐⭐</div>
+          </div>
+          <div class="tile-info">
+            <span class="gcd-tag mat">Matemática</span>
+            <h4>Mercado do Aluno</h4>
+            <p>Calcule totais e troco como um caixa!</p>
+          </div>
+          <button class="btn btn-primary tile-btn" onclick="openGame('mercado-aluno')">Jogar</button>
+        </div>
+
+        <div class="game-tile" data-category="portugues" data-name="corrida das palavras">
+          <div class="tile-thumb" style="background: linear-gradient(135deg, #CE93D8, #7B1FA2);">
+            <span>🏃</span>
+            <div class="tile-stars">⭐⭐⭐</div>
+          </div>
+          <div class="tile-info">
+            <span class="gcd-tag" style="background:#EDE7F6;color:#6A1B9A;">Português</span>
+            <h4>Corrida das Palavras</h4>
+            <p>Escolha a ortografia certa e vença a corrida!</p>
+          </div>
+          <button class="btn btn-primary tile-btn" onclick="openGame('corrida-palavras')">Jogar</button>
+        </div>
+
+        <div class="game-tile" data-category="portugues" data-name="quebra-cabeca de palavras">
+          <div class="tile-thumb" style="background: linear-gradient(135deg, #FFCC80, #F57C00);">
+            <span>🧩</span>
+            <div class="tile-stars">⭐⭐⭐</div>
+          </div>
+          <div class="tile-info">
+            <span class="gcd-tag" style="background:#EDE7F6;color:#6A1B9A;">Português</span>
+            <h4>Quebra-Cabeça de Palavras</h4>
+            <p>Monte sílabas e letras para formar palavras!</p>
+          </div>
+          <button class="btn btn-primary tile-btn" onclick="openGame('quebra-cabeca')">Jogar</button>
+        </div>
+
+        <div class="game-tile" data-category="portugues" data-name="labirinto das letras">
+          <div class="tile-thumb" style="background: linear-gradient(135deg, #80DEEA, #00838F);">
+            <span>🎮</span>
+            <div class="tile-stars">⭐⭐⭐</div>
+            <div class="tile-badge novo">Novo</div>
+          </div>
+          <div class="tile-info">
+            <span class="gcd-tag" style="background:#EDE7F6;color:#6A1B9A;">Português</span>
+            <h4>Labirinto das Letras</h4>
+            <p>Plataforma: colete letras na ordem certa!</p>
+          </div>
+          <button class="btn btn-primary tile-btn" onclick="openGame('labirinto-letras')">Jogar</button>
+        </div>
+
+        <div class="game-tile" data-category="portugues" data-name="mestre das trocas">
+          <div class="tile-thumb" style="background: linear-gradient(135deg, #CE93D8, #6A1B9A);">
+            <span>✏️</span>
+            <div class="tile-stars">⭐⭐⭐</div>
+            <div class="tile-badge novo">Novo</div>
+          </div>
+          <div class="tile-info">
+            <span class="gcd-tag" style="background:#EDE7F6;color:#6A1B9A;">Português</span>
+            <h4>Mestre das Trocas</h4>
+            <p>Corrija os erros ortográficos: G/J, X/CH, R/RR e mais!</p>
+          </div>
+          <button class="btn btn-primary tile-btn" onclick="openGame('mestre-trocas')">Jogar</button>
+        </div>
+
+        <div class="game-tile" data-category="portugues" data-name="fabrica de palavras">
+          <div class="tile-thumb" style="background: linear-gradient(135deg, #B39DDB, #4A148C);">
+            <span>🏭</span>
+            <div class="tile-stars">⭐⭐⭐</div>
+            <div class="tile-badge novo">Novo</div>
+          </div>
+          <div class="tile-info">
+            <span class="gcd-tag" style="background:#EDE7F6;color:#6A1B9A;">Português</span>
+            <h4>Fábrica de Palavras</h4>
+            <p>Monte as sílabas complexas na ordem certa: LH, NH, BR, FR…</p>
+          </div>
+          <button class="btn btn-primary tile-btn" onclick="openGame('fabrica-palavras')">Jogar</button>
+        </div>
+
+      </div>
+
+      <div class="no-results hidden" id="noResults">
+        <span>🔍</span>
+        <p>Nenhum jogo encontrado</p>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const gamePaths = {
+      'aventura-numeros': 'jogos/memoria-matematica.html',
+      'quiz-fracoes':     'jogos/balanca-magica.html',
+      'caca-numero':       'jogos/caca-ao-numero.html',
+      'pizzaria-divisao':  'jogos/pizzaria-da-divisao.html',
+      'mercado-aluno':     'jogos/mercado-do-aluno.html',
+      'corrida-palavras':  'jogos/corrida-das-palavras.html',
+      'quebra-cabeca':     'jogos/quebra-cabeca-palavras.html',
+      'labirinto-letras':  'jogos/labirinto-das-letras.html',
+      'mestre-trocas':     'jogos/mestre-das-trocas.html',
+      'fabrica-palavras':  'jogos/fabrica-de-palavras.html',
+    };
+
+    function openGame(id) {
+      if (gamePaths[id]) {
+        window.location.href = gamePaths[id];
+      }
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('show');
+    }
+
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('overlay').classList.remove('show');
+    }
+
+    function filterGames(category) {
+      document.querySelectorAll('.nav-item, .filter-chip').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll('[data-cat="' + category + '"]').forEach(n => n.classList.add('active'));
+
+      const tiles = document.querySelectorAll('.game-tile');
+      let count = 0;
+      tiles.forEach(tile => {
+        const match = category === 'todos' || tile.dataset.category === category;
+        tile.style.display = match ? '' : 'none';
+        if (match) count++;
+      });
+
+      const labels = { todos: 'Todos os Jogos', matematica: 'Matemática', portugues: 'Português' };
+      document.getElementById('gamesTitle').textContent = labels[category] || category;
+      document.getElementById('gamesCount').textContent = `${count} jogos`;
+
+      closeSidebar();
+    }
+
+    function searchGames(query) {
+      const q = query.toLowerCase().trim();
+      const tiles = document.querySelectorAll('.game-tile');
+      let count = 0;
+
+      tiles.forEach(tile => {
+        const name = tile.dataset.name || '';
+        const match = name.includes(q) || q === '';
+        tile.style.display = match ? '' : 'none';
+        if (match) count++;
+      });
+
+      document.getElementById('noResults').classList.toggle('hidden', count > 0);
+      document.getElementById('gamesCount').textContent = `${count} jogos`;
+    }
+
+  </script>
+</body>
+</html>

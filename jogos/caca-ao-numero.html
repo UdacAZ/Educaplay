@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caça ao Número – EducaPlay</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ocean-deep:  #053a5c;
+      --ocean-mid:   #0d6b9e;
+      --ocean-light: #1a9fd4;
+      --ocean-surf:  #52c5e8;
+      --ocean-bg:    #e3f6fd;
+      --sand:        #c8973a;
+      --coral-btn:   #ff6b47;
+      --coral-dark:  #e8501e;
+      --teal:        #00b4d8;
+      --teal-dark:   #0096c7;
+      --yellow:      #ffd166;
+      --green:       #4caf50;
+      --red:         #ef5350;
+      --white:       #ffffff;
+      --text-dark:   #0a2a3a;
+      --text-mid:    #1d4e6b;
+      --text-light:  #5b8fa8;
+      --shadow:      0 8px 32px rgba(5,58,92,0.22);
+      --shadow-lg:   0 16px 48px rgba(5,58,92,0.32);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--ocean-bg);
+      color: var(--text-dark);
+      min-height: 100vh;
+    }
+
+    /* ── KEYFRAMES ── */
+    @keyframes float {
+      0%,100% { transform: translateY(0) rotate(-2deg); }
+      50%      { transform: translateY(-12px) rotate(2deg); }
+    }
+    @keyframes sway {
+      from { transform: rotate(-14deg); }
+      to   { transform: rotate(14deg); }
+    }
+    @keyframes swim-rtl {
+      from { transform: translateX(110vw); }
+      to   { transform: translateX(-220px); }
+    }
+    @keyframes swim-ltr {
+      from { transform: translateX(-220px) scaleX(-1); }
+      to   { transform: translateX(110vw) scaleX(-1); }
+    }
+    @keyframes rise {
+      0%   { transform: translateY(0) scale(0.5); opacity: 0; }
+      12%  { opacity: 0.75; }
+      88%  { opacity: 0.3; }
+      100% { transform: translateY(-72vh) scale(1.5); opacity: 0; }
+    }
+    @keyframes ray-sway {
+      from { transform: skewX(-5deg); opacity: 0.45; }
+      to   { transform: skewX(5deg);  opacity: 0.85; }
+    }
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to   { transform: scale(1.2); }
+    }
+    @keyframes hintIn {
+      from { opacity:0; transform:translateY(-5px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes pop-burst {
+      0%   { transform: scale(1);    opacity: 1; }
+      35%  { transform: scale(1.38); opacity: 1; }
+      65%  { transform: scale(0.88); opacity: 0.9; }
+      100% { transform: scale(1.1);  opacity: 0.8; }
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0) scale(1); }
+      20%     { transform: translateX(-8px) scale(1.05); }
+      40%     { transform: translateX(8px)  scale(1.05); }
+      60%     { transform: translateX(-5px) scale(1.02); }
+      80%     { transform: translateX(5px)  scale(1.02); }
+    }
+    @keyframes breathe {
+      0%,100% { transform: scale(1); }
+      50%     { transform: scale(1.05); }
+    }
+
+    /* ── SCREENS ── */
+    .screen { display: none; min-height: 100vh; flex-direction: column; }
+    .screen.active { display: flex; }
+
+    /* ════════════════════════════════════════
+       SHARED HEADER
+    ════════════════════════════════════════ */
+    .game-header {
+      background: linear-gradient(135deg, var(--ocean-deep), var(--ocean-mid));
+      color: white;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(5,58,92,0.35);
+    }
+    .game-header a {
+      color: white;
+      text-decoration: none;
+      font-size: 1.3rem;
+      background: rgba(255,255,255,0.15);
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .game-header a:hover { background: rgba(255,255,255,0.28); }
+    .game-header h1 { font-size: 1.2rem; font-weight: 900; display: flex; align-items: center; gap: 8px; }
+    .header-anim { animation: float 3s ease-in-out infinite; display: inline-block; }
+
+    /* ════════════════════════════════════════
+       DIFFICULTY SCREEN
+    ════════════════════════════════════════ */
+    #screen-difficulty {
+      background: linear-gradient(180deg, #b8e8f8 0%, #d8f2fc 60%, #e8f8fd 100%);
+    }
+    .diff-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      gap: 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .diff-body::before {
+      content: '🐠';
+      position: absolute;
+      font-size: 5rem; opacity: 0.1;
+      top: 8%; right: 4%;
+      animation: float 4s ease-in-out infinite;
+    }
+    .diff-body::after {
+      content: '🐟';
+      position: absolute;
+      font-size: 4rem; opacity: 0.1;
+      bottom: 12%; left: 4%;
+      animation: float 3.5s ease-in-out infinite reverse;
+    }
+
+    .diff-heading { text-align: center; }
+    .diff-heading .heading-icon {
+      font-size: 4.5rem;
+      display: block;
+      margin-bottom: 12px;
+      animation: float 3s ease-in-out infinite;
+      filter: drop-shadow(0 4px 8px rgba(5,58,92,0.2));
+    }
+    .diff-heading h2 { font-size: 2rem; font-weight: 900; color: var(--ocean-deep); margin-bottom: 8px; }
+    .diff-heading p  { color: var(--text-mid); font-weight: 600; }
+
+    .diff-cards { display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; }
+    .diff-card {
+      background: white;
+      border-radius: 26px;
+      padding: 32px 22px 24px;
+      width: 200px;
+      text-align: center;
+      cursor: pointer;
+      border: 4px solid transparent;
+      box-shadow: var(--shadow);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .diff-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 6px;
+      border-radius: 22px 22px 0 0;
+    }
+    .diff-card:hover { transform: translateY(-10px) scale(1.02); box-shadow: var(--shadow-lg); }
+
+    .diff-card.easy-card  { border-color: var(--teal); }
+    .diff-card.easy-card::before  { background: linear-gradient(to right, var(--teal), #90e0ef); }
+    .diff-card.med-card   { border-color: var(--coral-btn); }
+    .diff-card.med-card::before   { background: linear-gradient(to right, var(--coral-btn), var(--yellow)); }
+    .diff-card.hard-card  { border-color: var(--ocean-mid); }
+    .diff-card.hard-card::before  { background: linear-gradient(to right, var(--ocean-mid), var(--teal)); }
+
+    .diff-emoji {
+      font-size: 3.5rem;
+      margin-bottom: 12px;
+      display: block;
+      animation: float 3.5s ease-in-out infinite;
+    }
+    .diff-name { font-size: 1.25rem; font-weight: 900; color: var(--ocean-deep); margin-bottom: 8px; }
+    .diff-desc { font-size: 0.82rem; color: var(--text-light); line-height: 1.5; font-weight: 600; }
+
+    .btn-diff {
+      width: 100%; margin-top: 18px;
+      padding: 12px;
+      border: none; border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem; font-weight: 900;
+      color: white; cursor: pointer;
+      box-shadow: 0 5px 0 rgba(0,0,0,0.15);
+      transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .btn-diff:hover  { transform: scale(1.05) translateY(-2px); }
+    .btn-diff:active { transform: scale(0.97) translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
+    .easy-card .btn-diff  { background: linear-gradient(135deg, var(--teal), var(--teal-dark)); }
+    .med-card .btn-diff   { background: linear-gradient(135deg, var(--coral-btn), var(--coral-dark)); }
+    .hard-card .btn-diff  { background: linear-gradient(135deg, var(--ocean-mid), var(--ocean-deep)); }
+
+    /* ════════════════════════════════════════
+       TUTORIAL SCREEN
+    ════════════════════════════════════════ */
+    #screen-tutorial {
+      background: linear-gradient(180deg, #b8e8f8 0%, #e3f6fd 100%);
+    }
+    .tutorial-body {
+      flex: 1; display: flex;
+      align-items: center; justify-content: center;
+      padding: 32px 20px;
+    }
+    .tutorial-wrap {
+      background: white;
+      border-radius: 28px;
+      padding: 36px 32px;
+      max-width: 560px; width: 100%;
+      box-shadow: var(--shadow);
+      border: 3px solid rgba(0,180,216,0.2);
+    }
+    .tutorial-head { text-align: center; margin-bottom: 28px; }
+    .tutorial-head .t-icon {
+      font-size: 3.5rem; margin-bottom: 10px;
+      display: block;
+      animation: float 3s ease-in-out infinite;
+    }
+    .tutorial-head h2 { font-size: 1.6rem; font-weight: 900; color: var(--ocean-deep); margin-bottom: 6px; }
+    .tutorial-head p  { color: var(--text-light); font-weight: 600; }
+
+    .steps-list { margin-bottom: 24px; }
+    .t-step { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+    .t-step-num {
+      background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+      color: white; width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 0.9rem; flex-shrink: 0;
+      box-shadow: 0 3px 0 rgba(0,0,0,0.14);
+    }
+    .t-step:nth-child(2) .t-step-num { background: linear-gradient(135deg, var(--coral-btn), var(--coral-dark)); }
+    .t-step:nth-child(3) .t-step-num { background: linear-gradient(135deg, #4caf50, #2e7d32); }
+    .t-step:nth-child(4) .t-step-num { background: linear-gradient(135deg, var(--yellow), #f59e0b); color: var(--text-dark); }
+    .t-step-text { padding-top: 5px; color: var(--text-mid); line-height: 1.5; font-weight: 600; }
+    .t-step-text strong { color: var(--ocean-deep); }
+
+    .tutorial-demo {
+      background: linear-gradient(180deg, var(--ocean-light) 0%, var(--ocean-mid) 100%);
+      border-radius: 20px; padding: 20px 16px; margin-bottom: 24px;
+      text-align: center; position: relative; overflow: hidden;
+      border: 3px solid rgba(255,255,255,0.25);
+    }
+    .tutorial-demo::before {
+      content: '🐡'; position: absolute;
+      font-size: 2.2rem; right: 14px; top: 8px; opacity: 0.35;
+    }
+    .demo-eq {
+      font-size: 1.9rem; font-weight: 900;
+      color: white; margin-bottom: 16px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .demo-eq .demo-q {
+      display: inline-block;
+      background: rgba(255,255,255,0.22);
+      border-radius: 10px; padding: 2px 14px;
+      border: 2px solid rgba(255,255,255,0.5);
+    }
+    .demo-bubbles { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .demo-bubble {
+      width: 52px; height: 52px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 900;
+      background:
+        radial-gradient(circle at 33% 28%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 48%),
+        radial-gradient(circle at 50% 50%, rgba(185,220,255,0.2) 0%, rgba(220,240,255,0.08) 100%);
+      border: 2px solid rgba(255,255,255,0.8);
+      box-shadow: 0 0 10px rgba(120,190,255,0.3), inset 0 2px 6px rgba(255,255,255,0.5);
+      color: rgba(5,58,92,0.9);
+    }
+    .demo-bubble.correct {
+      background: radial-gradient(circle at 40% 35%, rgba(120,220,120,0.9) 0%, rgba(60,180,60,0.95) 100%);
+      border: 2px solid rgba(255,255,255,0.7);
+      box-shadow: 0 0 16px rgba(76,175,80,0.7);
+      color: white; transform: scale(1.2);
+    }
+    .demo-bubble.wrong { opacity: 0.35; }
+    .demo-label { font-size: 0.82rem; color: rgba(255,255,255,0.88); margin-top: 10px; font-weight: 700; }
+
+    .btn-start-game {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+      color: white; border: none; border-radius: 50px;
+      font-size: 1.1rem; font-weight: 900;
+      font-family: 'Nunito', sans-serif; cursor: pointer;
+      box-shadow: 0 6px 0 rgba(0,96,150,0.3);
+      transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .btn-start-game:hover  { transform: translateY(-3px) scale(1.02); box-shadow: 0 9px 0 rgba(0,96,150,0.25); }
+    .btn-start-game:active { transform: translateY(2px); box-shadow: 0 3px 0 rgba(0,96,150,0.3); }
+
+    /* ════════════════════════════════════════
+       GAME SCREEN
+    ════════════════════════════════════════ */
+    #screen-game { background: var(--ocean-deep); }
+
+    .game-top {
+      background: linear-gradient(135deg, var(--ocean-deep), var(--ocean-mid));
+      color: white; padding: 12px 20px;
+      display: flex; align-items: center; gap: 12px;
+      flex-shrink: 0; z-index: 10;
+      box-shadow: 0 4px 16px rgba(5,58,92,0.4);
+    }
+    .g-score {
+      font-size: 1rem; font-weight: 900; min-width: 84px;
+      background: rgba(255,255,255,0.15);
+      padding: 6px 14px; border-radius: 50px;
+    }
+    .g-progress-wrap { flex: 1; text-align: center; }
+    .g-progress-label { font-size: 0.78rem; margin-bottom: 4px; font-weight: 700; }
+    .g-progress-bar { background: rgba(255,255,255,0.2); border-radius: 8px; height: 8px; overflow: hidden; }
+    .g-progress-fill {
+      background: linear-gradient(to right, var(--teal), #90e0ef);
+      height: 100%; border-radius: 8px;
+      transition: width 0.4s ease;
+    }
+    .g-timer {
+      font-size: 1.5rem; font-weight: 900;
+      min-width: 44px; text-align: center;
+      background: rgba(255,255,255,0.15);
+      padding: 6px 10px; border-radius: 12px;
+    }
+    .g-timer.urgent { color: var(--yellow); animation: pulse 0.5s infinite alternate; }
+
+    /* Equation panel */
+    .game-info {
+      padding: 14px 20px 8px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 6px;
+      flex-shrink: 0; z-index: 10; position: relative;
+      background: linear-gradient(180deg, rgba(5,58,92,0.9) 0%, rgba(5,58,92,0) 100%);
+    }
+    .eq-box {
+      background: white; border-radius: 24px;
+      padding: 14px 36px;
+      font-size: 2.1rem; font-weight: 900;
+      color: var(--ocean-deep);
+      box-shadow: 0 6px 24px rgba(5,58,92,0.35);
+      text-align: center; white-space: nowrap;
+      border: 3px solid rgba(0,180,216,0.3);
+    }
+    .eq-q {
+      display: inline-block;
+      background: var(--teal); color: white;
+      border-radius: 12px; padding: 2px 16px;
+    }
+    .feedback-msg {
+      font-size: 1.05rem; font-weight: 900;
+      min-height: 28px; text-align: center;
+      color: white;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .feedback-msg.ok  { color: #a8f5b8; }
+    .feedback-msg.err { color: #ffb3b3; }
+
+    .hint-bar {
+      background: rgba(255,209,102,0.96);
+      border: 2px solid var(--yellow);
+      border-radius: 12px; padding: 6px 16px;
+      font-size: 0.82rem; font-weight: 800;
+      color: #7a5200; text-align: center;
+      display: none; animation: hintIn 0.3s ease;
+    }
+    .hint-bar.show { display: block; }
+
+    /* ── AQUARIUM WRAPPER ── */
+    .aquarium-wrapper {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── AQUARIUM BACKGROUND LAYER ── */
+    .aquarium-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+      background: linear-gradient(180deg,
+        #62d0f0 0%,
+        #1faed8 12%,
+        #0d85c4 40%,
+        #085d96 68%,
+        #053a5c 84%,
+        #032c48 100%
+      );
+    }
+
+    /* Caustic light shimmer at surface */
+    .aquarium-bg::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 48%;
+      background:
+        radial-gradient(ellipse at 18% 0%, rgba(255,255,255,0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 52% 0%, rgba(255,255,255,0.14) 0%, transparent 48%),
+        radial-gradient(ellipse at 86% 0%, rgba(255,255,255,0.17) 0%, transparent 50%);
+    }
+
+    /* ── LIGHT RAYS ── */
+    .rays { position: absolute; top: 0; left: 0; right: 0; height: 58%; }
+    .ray {
+      position: absolute; top: 0;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.18), transparent);
+      border-radius: 0 0 50% 50%;
+      animation: ray-sway 5s ease-in-out infinite alternate;
+    }
+    .ray:nth-child(1) { left:10%; width:20px; height:44%; animation-delay:0s; }
+    .ray:nth-child(2) { left:27%; width:11px; height:32%; animation-delay:0.9s; }
+    .ray:nth-child(3) { left:46%; width:26px; height:52%; animation-delay:1.6s; }
+    .ray:nth-child(4) { left:63%; width:13px; height:38%; animation-delay:0.4s; }
+    .ray:nth-child(5) { left:78%; width:18px; height:46%; animation-delay:1.3s; }
+    .ray:nth-child(6) { left:91%; width:9px;  height:28%; animation-delay:0.7s; }
+
+    /* ── DECORATIVE FISH ── */
+    .fish-deco {
+      position: absolute;
+      pointer-events: none;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));
+    }
+    .fish-deco.rtl { animation: swim-rtl linear infinite; }
+    .fish-deco.ltr { animation: swim-ltr linear infinite; }
+
+    .fd1 { top:16%; font-size:2.6rem; }
+    .fd2 { top:38%; font-size:1.9rem; }
+    .fd3 { top:24%; font-size:3.2rem; }
+    .fd4 { top:52%; font-size:1.7rem; }
+    .fd5 { top:62%; font-size:2.2rem; }
+
+    /* ── SAND FLOOR ── */
+    .sand-floor {
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 17%;
+      background: linear-gradient(to top, #a87020, #c8973a, #d8aa52, rgba(200,151,58,0));
+      border-radius: 55% 55% 0 0 / 28px 28px 0 0;
+    }
+    .sand-floor::after {
+      content: '';
+      position: absolute;
+      top: 20%; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        90deg,
+        transparent 0px, transparent 26px,
+        rgba(0,0,0,0.07) 26px, rgba(0,0,0,0.07) 28px
+      );
+      border-radius: 55% 55% 0 0 / 28px 28px 0 0;
+    }
+
+    /* ── SEAWEED ── */
+    .seaweed-group {
+      position: absolute;
+      bottom: 16%; left: 0; right: 0; height: 0;
+    }
+    .seaweed {
+      position: absolute; bottom: 0;
+      width: 12px;
+      background: linear-gradient(to top, #14471e, #267534, #3a9e50);
+      border-radius: 6px 6px 0 0;
+      transform-origin: bottom center;
+      animation: sway 2.6s ease-in-out infinite alternate;
+    }
+    .seaweed::before {
+      content: '';
+      position: absolute; top: 20%; left: -11px;
+      width: 20px; height: 34%;
+      background: linear-gradient(120deg, #267534, #5cb86a);
+      border-radius: 0 50% 50% 0;
+    }
+    .seaweed::after {
+      content: '';
+      position: absolute; top: 50%; right: -11px;
+      width: 20px; height: 28%;
+      background: linear-gradient(-120deg, #267534, #5cb86a);
+      border-radius: 50% 0 0 50%;
+    }
+
+    /* ── BOTTOM DECORATIONS ── */
+    .bottom-deco {
+      position: absolute; bottom: 14%;
+      left: 0; right: 0; height: 0;
+    }
+    .deco-item {
+      position: absolute; bottom: 0;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+
+    /* ── DECORATIVE RISING BUBBLES ── */
+    .deco-bubble {
+      position: absolute;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(255,255,255,0.92) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(200,235,255,0.18) 0%, transparent 100%);
+      border: 1px solid rgba(255,255,255,0.65);
+      animation: rise linear infinite;
+      pointer-events: none;
+    }
+
+    /* ── INTERACTIVE BUBBLES AREA ── */
+    .bubbles-area {
+      position: absolute; inset: 0;
+      z-index: 2; background: transparent; overflow: hidden;
+    }
+
+    /* ─────────── SOAP BUBBLE ─────────── */
+    .bubble {
+      position: absolute;
+      width: 74px; height: 74px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      will-change: left, top;
+      background:
+        radial-gradient(circle at 33% 28%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0) 45%),
+        radial-gradient(circle at 68% 74%, rgba(200,228,255,0.45) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(185,220,255,0.18) 0%, rgba(220,240,255,0.06) 100%);
+      border: 2px solid rgba(255,255,255,0.78);
+      box-shadow:
+        0 0 14px rgba(130,195,255,0.28),
+        0 4px 18px rgba(100,160,220,0.18),
+        inset 0 2px 10px rgba(255,255,255,0.55),
+        inset 0 -8px 20px rgba(175,215,255,0.22);
+      font-size: 1.3rem; font-weight: 900;
+      color: rgba(5,58,92,0.9);
+      text-shadow: 0 1px 3px rgba(255,255,255,0.95), 0 0 10px rgba(255,255,255,0.6);
+      animation: breathe 3.2s ease-in-out infinite;
+    }
+    .bubble::before {
+      content: '';
+      position: absolute;
+      top: 13%; left: 19%;
+      width: 38%; height: 30%;
+      background: radial-gradient(ellipse, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0) 100%);
+      border-radius: 50%; pointer-events: none;
+    }
+    .bubble::after {
+      content: '';
+      position: absolute; inset: 0; border-radius: 50%;
+      background: conic-gradient(
+        from 10deg at 50% 50%,
+        rgba(255,140,170,0.22) 0deg,   rgba(140,175,255,0.22) 60deg,
+        rgba(140,255,195,0.17) 120deg, rgba(255,235,140,0.17) 190deg,
+        rgba(215,140,255,0.22) 260deg, rgba(140,215,255,0.22) 320deg,
+        rgba(255,140,170,0.22) 360deg
+      );
+      pointer-events: none;
+    }
+    .bubble:not(.popped):not(.bad):not(.disabled):not(.reveal):hover {
+      filter: brightness(1.1) drop-shadow(0 0 14px rgba(100,210,255,0.65));
+    }
+    .bubble.popped {
+      background: radial-gradient(circle at 40% 35%, rgba(120,220,120,0.9) 0%, rgba(60,180,60,0.95) 100%) !important;
+      border-color: rgba(255,255,255,0.8) !important;
+      box-shadow: 0 0 22px rgba(76,175,80,0.6), inset 0 2px 10px rgba(255,255,255,0.5) !important;
+      color: white !important; text-shadow: 0 1px 4px rgba(0,0,0,0.2) !important;
+      animation: pop-burst 0.45s ease forwards !important;
+      cursor: default; pointer-events: none;
+    }
+    .bubble.bad {
+      background: radial-gradient(circle at 40% 35%, rgba(240,120,130,0.88) 0%, rgba(210,60,80,0.92) 100%) !important;
+      border-color: rgba(255,255,255,0.7) !important;
+      color: white !important; text-shadow: none !important;
+      animation: shake 0.4s ease !important; pointer-events: none;
+    }
+    .bubble.disabled {
+      opacity: 0.18; pointer-events: none; cursor: default; animation: none !important;
+    }
+    .bubble.reveal {
+      background: radial-gradient(circle at 40% 35%, rgba(100,210,100,0.9) 0%, rgba(50,170,50,0.95) 100%) !important;
+      border-color: rgba(255,255,255,0.8) !important;
+      color: white !important; text-shadow: 0 1px 4px rgba(0,0,0,0.2) !important;
+      animation: none !important; pointer-events: none;
+    }
+
+    /* ════════════════════════════════════════
+       VICTORY SCREEN
+    ════════════════════════════════════════ */
+    #screen-victory {
+      background: linear-gradient(135deg, #032c48 0%, var(--ocean-mid) 55%, var(--ocean-light) 100%);
+    }
+    .victory-body {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 32px 20px; position: relative; overflow: hidden;
+    }
+    .victory-body::before { content:'🐠'; position:absolute; font-size:8rem; top:-10px; right:-10px; opacity:0.1; }
+    .victory-body::after  { content:'🐟'; position:absolute; font-size:6rem; bottom:-10px; left:-10px; opacity:0.1; }
+
+    .victory-box {
+      background: white; border-radius: 32px;
+      padding: 48px 36px 40px; max-width: 460px; width: 100%;
+      text-align: center;
+      box-shadow: 0 24px 80px rgba(5,58,92,0.38);
+      position: relative; z-index: 1;
+    }
+    .victory-box::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 8px;
+      background: linear-gradient(to right, #52c5e8, #00b4d8, #4caf50, #ffd166, #ff6b47);
+      border-radius: 32px 32px 0 0;
+    }
+
+    .v-icon { font-size: 5rem; margin-bottom: 10px; display: block; animation: float 2.5s ease-in-out infinite; }
+    .v-title { font-size: 1.9rem; font-weight: 900; color: var(--ocean-deep); margin-bottom: 6px; }
+    .v-sub   { color: var(--text-light); margin-bottom: 24px; font-weight: 600; }
+
+    .v-score-box {
+      background: linear-gradient(135deg, #e3f6fd, #c0e9f8);
+      border-radius: 20px; padding: 18px; margin-bottom: 20px;
+      border: 2px solid rgba(0,180,216,0.2);
+    }
+    .v-pts       { font-size: 3rem; font-weight: 900; color: var(--ocean-deep); }
+    .v-pts-label { color: var(--text-light); font-size: 0.88rem; font-weight: 700; }
+    .v-stars     { font-size: 2.2rem; margin-top: 6px; }
+
+    .v-stats { display: flex; gap: 12px; justify-content: center; margin-bottom: 24px; }
+    .vstat {
+      background: var(--ocean-bg); border-radius: 16px;
+      padding: 12px 16px; flex: 1;
+      border: 2px solid rgba(0,180,216,0.15);
+    }
+    .vstat strong { display: block; font-size: 1.4rem; color: var(--ocean-deep); }
+    .vstat span   { font-size: 0.78rem; color: var(--text-light); font-weight: 700; }
+
+    .btn-group { display: flex; flex-direction: column; gap: 12px; }
+    .btn {
+      padding: 15px; border: 3px solid transparent; border-radius: 50px;
+      font-size: 1rem; font-weight: 900; font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      box-shadow: 0 5px 0 rgba(0,0,0,0.1);
+      transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .btn:hover  { transform: scale(1.04) translateY(-2px); }
+    .btn:active { transform: scale(0.97) translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
+    .btn-primary   { background: linear-gradient(135deg, var(--teal), var(--teal-dark)); color: white; }
+    .btn-secondary { background: white; color: var(--ocean-mid); border-color: var(--teal); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 500px) {
+      .diff-cards { flex-direction: column; align-items: center; }
+      .diff-card  { width: 290px; }
+      .eq-box     { font-size: 1.65rem; padding: 12px 20px; }
+      .bubble     { width: 62px; height: 62px; font-size: 1.1rem; }
+      .tutorial-wrap { padding: 24px 20px; }
+      .victory-box   { padding: 36px 20px 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════ SCREEN 1: DIFFICULTY ═══════════ -->
+<div class="screen active" id="screen-difficulty">
+  <div class="game-header">
+    <a href="../dashboard.html">←</a>
+    <h1><span class="header-anim">🐠</span> Caça ao Número</h1>
+  </div>
+  <div class="diff-body">
+    <div class="diff-heading">
+      <span class="heading-icon">🫧</span>
+      <h2>Escolha a Dificuldade</h2>
+      <p>Estoure a bolha certa no aquário!</p>
+    </div>
+    <div class="diff-cards">
+      <div class="diff-card easy-card" onclick="initGame('facil')">
+        <div class="diff-emoji">🐟</div>
+        <div class="diff-name">Fácil</div>
+        <div class="diff-desc">Adição e subtração<br>8 bolhas · 15s por questão</div>
+        <button class="btn-diff">Mergulhar! 🫧</button>
+      </div>
+      <div class="diff-card med-card" onclick="initGame('medio')">
+        <div class="diff-emoji">🐠</div>
+        <div class="diff-name">Médio</div>
+        <div class="diff-desc">+, −, × com números maiores<br>11 bolhas · 12s por questão</div>
+        <button class="btn-diff">Mergulhar! 🫧</button>
+      </div>
+      <div class="diff-card hard-card" onclick="initGame('dificil')">
+        <div class="diff-emoji">🦈</div>
+        <div class="diff-name">Difícil</div>
+        <div class="diff-desc">Todas as operações<br>14 bolhas · 10s por questão</div>
+        <button class="btn-diff">Mergulhar! 🫧</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SCREEN 2: TUTORIAL ═══════════ -->
+<div class="screen" id="screen-tutorial">
+  <div class="game-header">
+    <a href="#" onclick="showScreen('screen-difficulty');return false;">←</a>
+    <h1><span class="header-anim">🫧</span> Como Jogar</h1>
+  </div>
+  <div class="tutorial-body">
+    <div class="tutorial-wrap">
+      <div class="tutorial-head">
+        <div class="t-icon">🐠</div>
+        <h2>Caça ao Número</h2>
+        <p>Estoure a bolha certa no aquário!</p>
+      </div>
+      <div class="steps-list">
+        <div class="t-step">
+          <div class="t-step-num">1</div>
+          <div class="t-step-text">Uma <strong>conta com "?"</strong> aparece na tela — descubra o número que falta</div>
+        </div>
+        <div class="t-step">
+          <div class="t-step-num">2</div>
+          <div class="t-step-text"><strong>Bolhas flutuam</strong> pelo aquário com números — só <strong>uma</strong> tem a resposta certa</div>
+        </div>
+        <div class="t-step">
+          <div class="t-step-num">3</div>
+          <div class="t-step-text"><strong>Clique na bolha certa</strong> antes do tempo acabar. Errou? A bolha fica vermelha!</div>
+        </div>
+        <div class="t-step">
+          <div class="t-step-num">4</div>
+          <div class="t-step-text">Acertou rápido? <strong>+3 pontos!</strong> No tempo médio? +2. Demorou? +1</div>
+        </div>
+      </div>
+      <div class="tutorial-demo">
+        <div class="demo-eq">3 + 4 = <span class="demo-q">?</span></div>
+        <div class="demo-bubbles">
+          <div class="demo-bubble wrong">5</div>
+          <div class="demo-bubble wrong">9</div>
+          <div class="demo-bubble correct">7</div>
+          <div class="demo-bubble wrong">6</div>
+          <div class="demo-bubble wrong">8</div>
+        </div>
+        <div class="demo-label">🫧 Estoure a bolha verde — ela tem a resposta!</div>
+      </div>
+      <button class="btn-start-game" onclick="beginGame()">🫧 Mergulhar no Aquário!</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SCREEN 3: GAME ═══════════ -->
+<div class="screen" id="screen-game">
+  <div class="game-top">
+    <div class="g-score">🪙 <span id="scoreDisplay">0</span> pts</div>
+    <div class="g-progress-wrap">
+      <div class="g-progress-label">Questão <span id="qNum">1</span> / <span id="qTotal">10</span></div>
+      <div class="g-progress-bar">
+        <div class="g-progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="g-timer" id="timerDisplay">15</div>
+  </div>
+
+  <div class="game-info">
+    <div class="eq-box" id="equationBox">3 + 4 = <span class="eq-q">?</span></div>
+    <div class="feedback-msg" id="feedbackMsg"></div>
+    <div class="hint-bar" id="hintBar"></div>
+  </div>
+
+  <!-- AQUARIUM -->
+  <div class="aquarium-wrapper">
+
+    <!-- Decoration layer (z-index 0, not wiped by JS) -->
+    <div class="aquarium-bg">
+
+      <!-- Light rays -->
+      <div class="rays">
+        <div class="ray"></div><div class="ray"></div><div class="ray"></div>
+        <div class="ray"></div><div class="ray"></div><div class="ray"></div>
+      </div>
+
+      <!-- Swimming fish -->
+      <div class="fish-deco rtl fd1" style="animation-duration:15s;animation-delay:-4s;">🐠</div>
+      <div class="fish-deco ltr fd2" style="animation-duration:19s;animation-delay:-6s;">🐟</div>
+      <div class="fish-deco rtl fd3" style="animation-duration:24s;animation-delay:-10s;">🐡</div>
+      <div class="fish-deco ltr fd4" style="animation-duration:13s;animation-delay:-3s;">🐬</div>
+      <div class="fish-deco rtl fd5" style="animation-duration:17s;animation-delay:-8s;">🐢</div>
+
+      <!-- Decorative rising bubbles -->
+      <div class="deco-bubble" style="width:6px;height:6px;left:7%;bottom:18%;animation-duration:5.2s;animation-delay:0s;"></div>
+      <div class="deco-bubble" style="width:9px;height:9px;left:11%;bottom:18%;animation-duration:7.1s;animation-delay:1.6s;"></div>
+      <div class="deco-bubble" style="width:5px;height:5px;left:24%;bottom:18%;animation-duration:6.3s;animation-delay:0.8s;"></div>
+      <div class="deco-bubble" style="width:7px;height:7px;left:60%;bottom:18%;animation-duration:8.0s;animation-delay:2.1s;"></div>
+      <div class="deco-bubble" style="width:10px;height:10px;left:72%;bottom:18%;animation-duration:6.6s;animation-delay:0.3s;"></div>
+      <div class="deco-bubble" style="width:6px;height:6px;left:87%;bottom:18%;animation-duration:5.8s;animation-delay:3.2s;"></div>
+      <div class="deco-bubble" style="width:8px;height:8px;left:93%;bottom:18%;animation-duration:7.4s;animation-delay:1.1s;"></div>
+      <div class="deco-bubble" style="width:5px;height:5px;left:40%;bottom:18%;animation-duration:6.0s;animation-delay:4.0s;"></div>
+
+      <!-- Seaweed -->
+      <div class="seaweed-group">
+        <div class="seaweed" style="left:4%;height:70px;"></div>
+        <div class="seaweed" style="left:9%;height:50px;animation-delay:.45s;animation-direction:alternate-reverse;"></div>
+        <div class="seaweed" style="left:14%;height:86px;animation-delay:.9s;"></div>
+        <div class="seaweed" style="left:21%;height:62px;animation-delay:.2s;animation-direction:alternate-reverse;"></div>
+        <div class="seaweed" style="left:56%;height:76px;animation-delay:.7s;"></div>
+        <div class="seaweed" style="left:64%;height:56px;animation-delay:.35s;animation-direction:alternate-reverse;"></div>
+        <div class="seaweed" style="left:71%;height:90px;animation-delay:1.1s;"></div>
+        <div class="seaweed" style="left:80%;height:66px;animation-delay:.55s;animation-direction:alternate-reverse;"></div>
+        <div class="seaweed" style="left:88%;height:52px;animation-delay:.8s;"></div>
+        <div class="seaweed" style="left:94%;height:78px;animation-delay:.15s;animation-direction:alternate-reverse;"></div>
+      </div>
+
+      <!-- Bottom decorations -->
+      <div class="bottom-deco">
+        <span class="deco-item" style="left:17%;font-size:2rem;">🪸</span>
+        <span class="deco-item" style="left:32%;font-size:1.5rem;">🐚</span>
+        <span class="deco-item" style="left:43%;font-size:2.2rem;">🪸</span>
+        <span class="deco-item" style="left:50%;font-size:1.3rem;">🪨</span>
+        <span class="deco-item" style="left:77%;font-size:2rem;">🪸</span>
+        <span class="deco-item" style="left:85%;font-size:1.6rem;">🐚</span>
+        <span class="deco-item" style="left:3%;font-size:1.4rem;">⭐</span>
+        <span class="deco-item" style="left:97%;font-size:1.3rem;">⭐</span>
+      </div>
+
+      <!-- Sand floor -->
+      <div class="sand-floor"></div>
+    </div>
+
+    <!-- Interactive bubbles (wiped & rebuilt by JS each question) -->
+    <div class="bubbles-area" id="bubblesArea"></div>
+  </div>
+</div>
+
+<!-- ═══════════ SCREEN 4: VICTORY ═══════════ -->
+<div class="screen" id="screen-victory">
+  <div class="game-header">
+    <a href="../dashboard.html">←</a>
+    <h1><span class="header-anim">🐠</span> Caça ao Número</h1>
+  </div>
+  <div class="victory-body">
+    <div class="victory-box">
+      <div class="v-icon" id="vIcon">🏆</div>
+      <div class="v-title" id="vTitle">Incrível!</div>
+      <div class="v-sub" id="vSub">Você completou a caçada!</div>
+      <div class="v-score-box">
+        <div class="v-pts" id="vPts">0</div>
+        <div class="v-pts-label">pontos</div>
+        <div class="v-stars" id="vStars">⭐⭐⭐</div>
+      </div>
+      <div class="v-stats">
+        <div class="vstat"><strong id="statCorrect">0</strong><span>Acertos</span></div>
+        <div class="vstat"><strong id="statMissed">0</strong><span>Perdidos</span></div>
+        <div class="vstat"><strong id="statTime">0s</strong><span>Tempo</span></div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="replayGame()">🔄 Mergulhar Novamente</button>
+        <button class="btn btn-secondary" onclick="window.location.href='../dashboard.html'">🏠 Voltar ao Dashboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ============================================================
+     AUDIO
+  ============================================================ */
+  let audioCtx = null;
+  function getCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+  function tone(freq, dur, type = 'sine', vol = 0.28) {
+    try {
+      const ctx = getCtx();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = type; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+      o.start(); o.stop(ctx.currentTime + dur);
+    } catch(e) {}
+  }
+  function playCorrect() {
+    tone(523,0.1); setTimeout(()=>tone(659,0.1),110); setTimeout(()=>tone(784,0.22),220);
+  }
+  function playWrong() { tone(200, 0.28, 'sawtooth', 0.18); }
+  function playVictory() {
+    [523,659,784,1047].forEach((f,i) => setTimeout(()=>tone(f,0.25), i*130));
+  }
+
+  /* ============================================================
+     ADAPTIVE ENGINE
+  ============================================================ */
+  const adaptive = {
+    history: [], diffMod: 0, hintLevel: 0,
+    reset() { this.history = []; this.diffMod = 0; this.hintLevel = 0; },
+    record(correct, fast = false) {
+      const pts = correct ? (fast ? 2 : 1) : -1;
+      this.history.push(pts);
+      if (this.history.length > 5) this.history.shift();
+      if (this.history.length >= 3) this._evaluate();
+    },
+    _evaluate() {
+      const sum = this.history.reduce((a, b) => a + b, 0);
+      if (sum <= -3) {
+        this.diffMod   = Math.max(-2, this.diffMod - 1);
+        this.hintLevel = Math.min(2, this.hintLevel + 1);
+      } else if (sum >= 5) {
+        this.diffMod   = Math.min(2, this.diffMod + 1);
+        this.hintLevel = Math.max(0, this.hintLevel - 1);
+      } else if (sum >= 3 && this.hintLevel > 0) {
+        this.hintLevel = Math.max(0, this.hintLevel - 1);
+      }
+    }
+  };
+  function showHintBar(msg) {
+    const el = document.getElementById('hintBar');
+    el.textContent = msg; el.classList.add('show');
+  }
+  function hideHintBar() { document.getElementById('hintBar').classList.remove('show'); }
+
+  /* ============================================================
+     CONFIG
+  ============================================================ */
+  const LEVELS = {
+    facil:  { name:'Fácil',   totalQ:10, bubbles:8,  timePerQ:15, ops:['+','-'],        maxA:10, maxB:8  },
+    medio:  { name:'Médio',   totalQ:10, bubbles:11, timePerQ:12, ops:['+','-','×'],     maxA:12, maxB:9  },
+    dificil:{ name:'Difícil', totalQ:10, bubbles:14, timePerQ:10, ops:['+','-','×','÷'], maxA:15, maxB:9  }
+  };
+
+  /* ============================================================
+     STATE
+  ============================================================ */
+  let currentLevel = 'facil';
+  let questions    = [];
+  let qIndex       = 0;
+  let score        = 0;
+  let correctCount = 0;
+  let missedCount  = 0;
+  let timerID      = null;
+  let timeLeft     = 0;
+  let locked       = false;
+  let gameStart    = 0;
+  let animID       = null;
+  let bubObjs      = [];
+
+  /* ============================================================
+     SCREENS
+  ============================================================ */
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+  function initGame(level)  { currentLevel = level; adaptive.reset(); showScreen('screen-tutorial'); }
+  function replayGame()     { stopAnim(); showScreen('screen-tutorial'); }
+
+  /* ============================================================
+     BEGIN GAME
+  ============================================================ */
+  function beginGame() {
+    const lvl  = LEVELS[currentLevel];
+    questions  = generateQuestions(lvl);
+    qIndex = score = correctCount = missedCount = 0;
+    gameStart  = Date.now();
+    document.getElementById('qTotal').textContent = lvl.totalQ;
+    showScreen('screen-game');
+    loadQuestion();
+  }
+
+  /* ============================================================
+     QUESTION GENERATION
+  ============================================================ */
+  function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+  function makeQ(lvl) {
+    const op = lvl.ops[Math.floor(Math.random() * lvl.ops.length)];
+    let a, b, answer, display;
+    if (op === '+') {
+      a = rnd(1, lvl.maxA); b = rnd(1, lvl.maxB);
+      answer = a + b; display = `${a} + ${b} = ?`;
+    } else if (op === '-') {
+      a = rnd(2, lvl.maxA + lvl.maxB); b = rnd(1, Math.min(a-1, lvl.maxB));
+      answer = a - b; display = `${a} − ${b} = ?`;
+    } else if (op === '×') {
+      a = rnd(2, Math.min(lvl.maxA,9)); b = rnd(2, Math.min(lvl.maxB,9));
+      answer = a * b; display = `${a} × ${b} = ?`;
+    } else {
+      b = rnd(2,9); answer = rnd(2,9); a = b * answer;
+      display = `${a} ÷ ${b} = ?`;
+    }
+    if (answer > 0 && answer <= 120) return { display, answer };
+    return makeQ(lvl);
+  }
+
+  function generateQuestions(lvl) {
+    const qs = []; const seen = new Set(); let t = 0;
+    while (qs.length < lvl.totalQ && t++ < 300) {
+      const q = makeQ(lvl);
+      if (!seen.has(q.display)) { seen.add(q.display); qs.push(q); }
+    }
+    return qs;
+  }
+
+  function makeDistractors(answer, count) {
+    const s = new Set([answer]);
+    for (let d = 1; s.size < count + 1; d++) {
+      if (answer - d > 0) s.add(answer - d);
+      if (s.size < count + 1) s.add(answer + d);
+    }
+    const arr = []; s.forEach(n => { if (n !== answer) arr.push(n); });
+    return arr.slice(0, count);
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length-1; i > 0; i--) {
+      const j = Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+  }
+
+  /* ============================================================
+     LOAD QUESTION
+  ============================================================ */
+  function loadQuestion() {
+    if (qIndex >= questions.length) { endGame(); return; }
+
+    stopAnim();
+    locked = false;
+    clearInterval(timerID);
+
+    const lvl = LEVELS[currentLevel];
+    const q   = questions[qIndex];
+
+    const dm = adaptive.diffMod;
+    const effectiveTime    = Math.max(6,  Math.min(28, lvl.timePerQ - dm * 2));
+    const effectiveBubbles = Math.max(4,  Math.min(18, lvl.bubbles  + dm * 2));
+
+    document.getElementById('qNum').textContent       = qIndex + 1;
+    document.getElementById('progressFill').style.width = `${(qIndex / lvl.totalQ) * 100}%`;
+    document.getElementById('scoreDisplay').textContent = score;
+    document.getElementById('equationBox').innerHTML   =
+      q.display.replace('?', '<span class="eq-q">?</span>');
+    const fb = document.getElementById('feedbackMsg');
+    fb.textContent = ''; fb.className = 'feedback-msg';
+    hideHintBar();
+
+    let hintTimerID = null;
+    if (adaptive.hintLevel >= 1) {
+      const delay   = Math.floor(effectiveTime * (adaptive.hintLevel >= 2 ? 0.4 : 0.55) * 1000);
+      const nRemove = adaptive.hintLevel >= 2 ? 3 : 2;
+      hintTimerID = setTimeout(() => {
+        if (locked) return;
+        const wrong = [...document.querySelectorAll('#bubblesArea .bubble:not(.popped):not(.disabled):not(.reveal)')]
+          .filter(b => Number(b.dataset.value) !== q.answer)
+          .slice(0, nRemove);
+        wrong.forEach(b => b.classList.add('disabled'));
+        if (wrong.length > 0) showHintBar(`💡 ${nRemove} bolha${nRemove > 1 ? 's erradas eliminadas' : ' errada eliminada'}!`);
+      }, delay);
+    }
+
+    const nums = [q.answer, ...makeDistractors(q.answer, effectiveBubbles - 1)];
+    shuffle(nums);
+
+    const area = document.getElementById('bubblesArea');
+    area.innerHTML = '';
+
+    const BUBBLE_R = window.innerWidth <= 500 ? 31 : 37;
+
+    nums.forEach(num => {
+      const el = document.createElement('div');
+      el.className = 'bubble';
+      el.textContent = num;
+      el.dataset.value = num;
+      el.style.animationDuration = `${2.6 + Math.random() * 1.8}s`;
+      el.style.animationDelay    = `-${Math.random() * 2}s`;
+      el.addEventListener('click', () => onBubbleClick(el, num, q.answer, lvl));
+      area.appendChild(el);
+    });
+
+    requestAnimationFrame(() => {
+      const W = area.clientWidth;
+      const H = area.clientHeight;
+      bubObjs = [];
+
+      const factor = 0.632;
+      const playW  = W * factor;
+      const playH  = H * factor;
+      const offX   = (W - playW) / 2;
+      const offY   = (H - playH) / 2;
+
+      area.querySelectorAll('.bubble').forEach(el => {
+        const speed = 0.18 + Math.random() * 0.22;
+        const angle = Math.random() * Math.PI * 2;
+        const x = offX + BUBBLE_R + Math.random() * Math.max(0, playW - 2 * BUBBLE_R);
+        const y = offY + BUBBLE_R + Math.random() * Math.max(0, playH - 2 * BUBBLE_R);
+        el.style.left = `${x - BUBBLE_R}px`;
+        el.style.top  = `${y - BUBBLE_R}px`;
+        bubObjs.push({ el, x, y, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed,
+                       r: BUBBLE_R, offX, offY, playW, playH });
+      });
+
+      startAnim();
+    });
+
+    timeLeft = effectiveTime;
+    renderTimer();
+    timerID = setInterval(tick, 1000);
+  }
+
+  /* ============================================================
+     BUBBLE PHYSICS
+  ============================================================ */
+  function isStopped(b) {
+    return b.el.classList.contains('popped')   ||
+           b.el.classList.contains('disabled') ||
+           b.el.classList.contains('reveal')   ||
+           b.el.classList.contains('bad');
+  }
+
+  function startAnim() {
+    if (animID) cancelAnimationFrame(animID);
+    function frame() {
+      bubObjs.forEach(b => {
+        if (isStopped(b)) return;
+        b.x += b.vx; b.y += b.vy;
+        const minX = b.offX + b.r, maxX = b.offX + b.playW - b.r;
+        const minY = b.offY + b.r, maxY = b.offY + b.playH - b.r;
+        if (b.x < minX) { b.x = minX; b.vx =  Math.abs(b.vx); }
+        if (b.x > maxX) { b.x = maxX; b.vx = -Math.abs(b.vx); }
+        if (b.y < minY) { b.y = minY; b.vy =  Math.abs(b.vy); }
+        if (b.y > maxY) { b.y = maxY; b.vy = -Math.abs(b.vy); }
+      });
+
+      for (let i = 0; i < bubObjs.length; i++) {
+        const a = bubObjs[i]; if (isStopped(a)) continue;
+        for (let j = i + 1; j < bubObjs.length; j++) {
+          const b = bubObjs[j]; if (isStopped(b)) continue;
+          const dx = b.x - a.x, dy = b.y - a.y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          const minD = a.r + b.r;
+          if (dist < minD && dist > 0) {
+            const nx = dx/dist, ny = dy/dist;
+            const dot = (a.vx - b.vx)*nx + (a.vy - b.vy)*ny;
+            if (dot > 0) { a.vx -= dot*nx; a.vy -= dot*ny; b.vx += dot*nx; b.vy += dot*ny; }
+            const push = (minD - dist) / 2 + 0.5;
+            a.x -= nx*push; a.y -= ny*push; b.x += nx*push; b.y += ny*push;
+          }
+        }
+      }
+
+      bubObjs.forEach(b => {
+        if (isStopped(b)) return;
+        b.el.style.left = `${b.x - b.r}px`;
+        b.el.style.top  = `${b.y - b.r}px`;
+      });
+      animID = requestAnimationFrame(frame);
+    }
+    animID = requestAnimationFrame(frame);
+  }
+
+  function stopAnim() {
+    if (animID) { cancelAnimationFrame(animID); animID = null; }
+  }
+
+  /* ============================================================
+     TIMER
+  ============================================================ */
+  function tick() {
+    timeLeft--; renderTimer();
+    if (timeLeft <= 0) { clearInterval(timerID); onTimeUp(); }
+  }
+  function renderTimer() {
+    const el = document.getElementById('timerDisplay');
+    el.textContent = timeLeft;
+    el.className = 'g-timer' + (timeLeft <= 3 ? ' urgent' : '');
+  }
+
+  /* ============================================================
+     BUBBLE CLICK
+  ============================================================ */
+  function onBubbleClick(el, value, answer, lvl) {
+    if (locked) return;
+    if (value === answer) {
+      locked = true; clearInterval(timerID);
+      el.classList.add('popped'); correctCount++;
+      const ratio = timeLeft / (LEVELS[currentLevel].timePerQ);
+      const fast  = ratio >= 0.6;
+      const pts   = fast ? 3 : (ratio >= 0.3 ? 2 : 1);
+      score += pts;
+      adaptive.record(true, fast);
+      const fb = document.getElementById('feedbackMsg');
+      fb.className = 'feedback-msg ok';
+      fb.textContent = pts===3 ? '🎉 Rápido! +3 pts' : pts===2 ? '✅ Correto! +2 pts' : '✅ Acertou! +1 pt';
+      document.getElementById('scoreDisplay').textContent = score;
+      playCorrect();
+      setTimeout(() => { qIndex++; loadQuestion(); }, 950);
+    } else {
+      el.classList.add('bad');
+      const fb = document.getElementById('feedbackMsg');
+      fb.className = 'feedback-msg err';
+      fb.textContent = '❌ Essa não! Continue procurando...';
+      playWrong();
+      setTimeout(() => { el.classList.remove('bad'); el.classList.add('disabled'); }, 420);
+    }
+  }
+
+  /* ============================================================
+     TIME UP
+  ============================================================ */
+  function onTimeUp() {
+    locked = true; missedCount++;
+    adaptive.record(false);
+    const q = questions[qIndex];
+    document.querySelectorAll('#bubblesArea .bubble').forEach(b => {
+      b.classList.add(Number(b.dataset.value) === q.answer ? 'reveal' : 'disabled');
+    });
+    const fb = document.getElementById('feedbackMsg');
+    fb.className = 'feedback-msg err';
+    fb.textContent = `⏰ Tempo esgotou! A resposta era ${q.answer}`;
+    playWrong();
+    setTimeout(() => { qIndex++; loadQuestion(); }, 1400);
+  }
+
+  /* ============================================================
+     END GAME
+  ============================================================ */
+  function endGame() {
+    stopAnim(); clearInterval(timerID);
+    const lvl     = LEVELS[currentLevel];
+    const pct     = score / (lvl.totalQ * 3);
+    const elapsed = Math.round((Date.now() - gameStart) / 1000);
+    let icon, title, sub;
+    if (pct >= 0.9)      { icon='🏆'; title='Sensacional!';      sub='Você é um mestre caçador de números!'; }
+    else if (pct >= 0.7) { icon='🌟'; title='Muito Bem!';         sub='Ótima caçada! Quase perfeito!'; }
+    else if (pct >= 0.5) { icon='😊'; title='Bom Trabalho!';      sub='Continue praticando para melhorar!'; }
+    else                 { icon='💪'; title='Continue Tentando!'; sub='A prática leva à perfeição!'; }
+    const stars = pct>=0.9 ? '⭐⭐⭐' : pct>=0.6 ? '⭐⭐' : '⭐';
+    document.getElementById('vIcon').textContent        = icon;
+    document.getElementById('vTitle').textContent       = title;
+    document.getElementById('vSub').textContent         = sub;
+    document.getElementById('vPts').textContent         = score;
+    document.getElementById('vStars').textContent       = stars;
+    document.getElementById('statCorrect').textContent  = correctCount;
+    document.getElementById('statMissed').textContent   = missedCount;
+    document.getElementById('statTime').textContent     = `${elapsed}s`;
+    playVictory();
+    showScreen('screen-victory');
+  }
+</script>
+<script src="../nipo.js"></script>
+</body>
+</html>

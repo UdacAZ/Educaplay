@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EducaPlay – Pizzaria da Divisão</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --red:        #C62828;
+      --red-dark:   #8B1919;
+      --red-deep:   #5C1010;
+      --orange:     #E65100;
+      --orange2:    #F57C00;
+      --amber:      #FF8F00;
+      --cream:      #FFF8F0;
+      --cream-dark: #F5E6D3;
+      --brown:      #4E342E;
+      --brown-mid:  #795548;
+      --brown-light:#A1887F;
+      --green:      #2E7D32;
+      --white:      #fff;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background:
+        linear-gradient(rgba(30,10,0,0.55), rgba(30,10,0,0.55)),
+        url('../imag/fundo_pizza.png') center/cover fixed;
+    }
+
+    .screen { display: none; width: 100%; max-width: 600px; padding: 20px; }
+    .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+    /* ===== INSÍGNIA DE PIZZARIA ===== */
+    .pizzeria-badge {
+      background: var(--red-dark);
+      color: var(--cream);
+      font-family: 'Fredoka One', cursive;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 4px 18px;
+      border-radius: 20px;
+      border: 2px solid var(--amber);
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+
+    /* ===== DIFFICULTY SCREEN ===== */
+    .diff-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .diff-header .logo-icon {
+      font-size: 72px;
+      display: block;
+      margin-bottom: 6px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+    }
+    .diff-header h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 36px;
+      color: var(--white);
+      text-shadow: 3px 3px 0 var(--red-dark), 0 0 20px rgba(230,81,0,0.7);
+      margin-bottom: 4px;
+    }
+    .diff-header p {
+      color: var(--cream-dark);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .diff-cards { display: flex; flex-direction: column; gap: 14px; width: 100%; }
+
+    .diff-card {
+      background: var(--cream);
+      border-radius: 16px;
+      padding: 18px 22px;
+      display: flex; align-items: center; gap: 16px;
+      cursor: pointer;
+      border: 3px solid var(--cream-dark);
+      border-left: 8px solid var(--brown-mid);
+      transition: all .2s;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      position: relative; overflow: hidden;
+    }
+    .diff-card::before {
+      content: '';
+      position: absolute; top: 0; right: 0;
+      width: 60px; height: 100%;
+      background: repeating-linear-gradient(
+        135deg,
+        transparent, transparent 6px,
+        rgba(180,100,50,0.08) 6px, rgba(180,100,50,0.08) 12px
+      );
+    }
+    .diff-card:hover { transform: translateX(4px) translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+    .diff-card.facil:hover   { border-left-color: #4CAF50; border-color: #4CAF50; }
+    .diff-card.medio:hover   { border-left-color: var(--orange); border-color: var(--orange); }
+    .diff-card.dificil:hover { border-left-color: var(--red); border-color: var(--red); }
+
+    .diff-card-icon { font-size: 44px; flex-shrink: 0; }
+    .diff-card-info h3 { font-size: 19px; font-weight: 900; color: var(--brown); }
+    .diff-card-info p  { font-size: 13px; color: var(--brown-mid); margin-top: 3px; }
+    .diff-card-badge {
+      margin-left: auto; font-size: 12px; font-weight: 700;
+      padding: 5px 12px; border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+    }
+    .badge-green  { background: #E8F5E9; color: #2E7D32; }
+    .badge-orange { background: #FFF3E0; color: var(--orange); }
+    .badge-red    { background: #FFEBEE; color: var(--red); }
+
+    /* ===== TUTORIAL SCREEN ===== */
+    .tuto-box {
+      background: var(--cream);
+      border-radius: 22px;
+      padding: 30px 26px;
+      width: 100%;
+      box-shadow: 0 6px 30px rgba(0,0,0,0.35);
+      border: 3px solid var(--amber);
+      position: relative;
+    }
+    .tuto-box::before {
+      content: '🍕 CARDÁPIO DE INSTRUÇÕES 🍕';
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      background: var(--red-dark); color: var(--cream);
+      font-family: 'Fredoka One', cursive;
+      font-size: 13px; letter-spacing: 1px;
+      padding: 4px 18px; border-radius: 20px; white-space: nowrap;
+      border: 2px solid var(--amber);
+    }
+    .tuto-box h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 26px; color: var(--red-dark);
+      margin-bottom: 22px; text-align: center; margin-top: 10px;
+    }
+    .tuto-steps { display: flex; flex-direction: column; gap: 16px; margin-bottom: 26px; }
+    .tuto-step { display: flex; align-items: flex-start; gap: 14px; }
+    .tuto-step-num {
+      min-width: 38px; height: 38px; border-radius: 50%;
+      background: var(--red-dark); color: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 17px;
+      border: 2px solid var(--amber); flex-shrink: 0;
+    }
+    .tuto-step p { font-size: 15px; color: var(--brown); line-height: 1.55; padding-top: 6px; }
+
+    /* ===== GAME SCREEN ===== */
+    .game-top {
+      width: 100%; display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+    }
+    .game-back {
+      background: var(--red-dark); border: 2px solid var(--amber); border-radius: 10px;
+      padding: 8px 14px; cursor: pointer; font-size: 18px; color: var(--white);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: background .15s;
+    }
+    .game-back:hover { background: var(--red); }
+    .game-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 20px; color: var(--white);
+      text-shadow: 2px 2px 0 var(--red-dark);
+    }
+    .game-score {
+      margin-left: auto; background: var(--red-dark);
+      border: 2px solid var(--amber);
+      border-radius: 20px; padding: 6px 16px;
+      font-size: 14px; font-weight: 800; color: var(--cream);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .timer-bar-wrap {
+      width: 100%; height: 12px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px; overflow: hidden;
+      margin-bottom: 8px;
+      border: 1px solid rgba(255,200,100,0.3);
+    }
+    .timer-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--amber), var(--orange2));
+      border-radius: 10px; transition: width 1s linear, background .4s;
+    }
+    .timer-bar.warn   { background: linear-gradient(90deg, var(--orange), var(--orange2)); }
+    .timer-bar.danger { background: linear-gradient(90deg, var(--red), #FF5722); }
+
+    .progress-text {
+      font-size: 13px; color: var(--cream-dark);
+      font-weight: 700; text-align: center; margin-bottom: 10px;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    }
+
+    .question-card {
+      background: var(--cream);
+      border-radius: 18px; padding: 18px 22px;
+      width: 100%; text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+      margin-bottom: 14px;
+      border: 3px solid var(--cream-dark);
+      border-top: 5px solid var(--red-dark);
+    }
+    .question-card p { font-size: 16px; color: var(--brown-mid); line-height: 1.5; }
+    .equation {
+      font-family: 'Fredoka One', cursive;
+      font-size: 38px; color: var(--red-dark);
+      margin-top: 8px; letter-spacing: 3px;
+    }
+
+    .pizza-wrap {
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px;
+      background: rgba(0,0,0,0.25);
+      border-radius: 50%;
+      padding: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4), inset 0 0 20px rgba(0,0,0,0.2);
+    }
+    #pizzaSvg { width: 210px; height: 210px; filter: drop-shadow(0 6px 18px rgba(0,0,0,.3)); }
+
+    .hint-bar {
+      width: 100%;
+      background: #FFF8DC;
+      border: 2px solid var(--amber);
+      border-radius: 12px; padding: 10px 16px;
+      font-size: 14px; color: var(--brown);
+      text-align: center; margin-bottom: 12px;
+      display: none;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .hint-bar.show { display: block; }
+
+    .answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+    .answer-btn {
+      background: var(--cream);
+      border: 3px solid var(--cream-dark);
+      border-radius: 18px; padding: 20px 10px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 34px; color: var(--brown);
+      cursor: pointer; transition: all .15s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .answer-btn:hover:not(:disabled) {
+      background: var(--amber);
+      border-color: var(--orange);
+      color: var(--white);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    }
+    .answer-btn.correct { background: #E8F5E9; border-color: #4CAF50; color: #2E7D32; transform: scale(1.05); }
+    .answer-btn.wrong   { background: #FFEBEE; border-color: var(--red); color: var(--red); }
+    .answer-btn:disabled { cursor: default; }
+
+    /* ===== VICTORY SCREEN ===== */
+    .vic-card {
+      background: var(--cream);
+      border-radius: 26px; padding: 38px 28px;
+      width: 100%; text-align: center;
+      box-shadow: 0 8px 36px rgba(0,0,0,0.4);
+      border: 4px solid var(--amber);
+      position: relative;
+    }
+    .vic-card::before {
+      content: '🏆 RESULTADO 🏆';
+      position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+      background: var(--red-dark); color: var(--cream);
+      font-family: 'Fredoka One', cursive;
+      font-size: 14px; padding: 5px 22px; border-radius: 20px;
+      border: 2px solid var(--amber); white-space: nowrap;
+    }
+    .vic-emoji { font-size: 80px; margin-bottom: 12px; margin-top: 10px; display: block; }
+    .vic-card h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 34px; color: var(--red-dark); margin-bottom: 6px;
+    }
+    .vic-card > p { color: var(--brown-mid); font-size: 16px; margin-bottom: 20px; font-weight: 600; }
+    .vic-stars { font-size: 50px; letter-spacing: 8px; margin-bottom: 22px; }
+    .vic-stats { display: flex; gap: 14px; justify-content: center; margin-bottom: 26px; flex-wrap: wrap; }
+    .vic-stat {
+      background: var(--cream-dark);
+      border-radius: 14px; padding: 14px 22px;
+      border: 2px solid var(--brown-light);
+    }
+    .vic-stat .stat-num   { font-family: 'Fredoka One', cursive; font-size: 34px; color: var(--red-dark); display: block; }
+    .vic-stat .stat-label { font-size: 12px; color: var(--brown-mid); font-weight: 700; }
+    .vic-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* ===== SHARED BUTTONS ===== */
+    .btn {
+      border: none; border-radius: 14px; padding: 14px 28px;
+      font-size: 16px; font-weight: 800; cursor: pointer;
+      transition: all .2s; font-family: 'Nunito', sans-serif;
+    }
+    .btn-primary {
+      background: var(--brown);
+      color: var(--white);
+      border: 2px solid var(--brown-light);
+    }
+    .btn-primary:hover { background: var(--brown-mid); transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent; color: var(--red-dark);
+      border: 2px solid var(--red-dark);
+    }
+    .btn-outline:hover { background: #FFEBEE; }
+    .btn-pizza {
+      background: linear-gradient(135deg, var(--red-dark), var(--orange));
+      color: var(--white);
+      border: 2px solid var(--amber);
+      box-shadow: 0 4px 14px rgba(198,40,40,0.4);
+    }
+    .btn-pizza:hover {
+      background: linear-gradient(135deg, var(--red), var(--orange2));
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(198,40,40,0.5);
+    }
+
+    /* ===== DECORAÇÃO LISTRAS TOALHA DE MESA ===== */
+    .tablecloth-border {
+      width: 100%;
+      height: 6px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--red-dark) 0px, var(--red-dark) 12px,
+        var(--white) 12px, var(--white) 24px
+      );
+      border-radius: 3px;
+      margin-bottom: 18px;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 480px) {
+      .screen { padding: 12px; }
+      #pizzaSvg { width: 175px; height: 175px; }
+      .answer-btn { font-size: 26px; padding: 16px 8px; }
+      .equation { font-size: 28px !important; }
+      .diff-header h1 { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- DIFFICULTY SCREEN -->
+<div class="screen active" id="screenDiff">
+  <div class="diff-header">
+    <span class="logo-icon">🍕</span>
+    <span class="pizzeria-badge">✦ Educa Play ✦</span>
+    <h1>Pizzaria da Divisão</h1>
+    <p>Divida as pizzas e aprenda matemática!</p>
+  </div>
+  <div class="tablecloth-border"></div>
+  <div class="diff-cards">
+    <div class="diff-card facil" onclick="startGame('facil')">
+      <span class="diff-card-icon">😊</span>
+      <div class="diff-card-info">
+        <h3>Fácil</h3>
+        <p>Divisões por 2, 3 e 4 · Pizzas menores</p>
+      </div>
+      <span class="diff-card-badge badge-green">Iniciante</span>
+    </div>
+    <div class="diff-card medio" onclick="startGame('medio')">
+      <span class="diff-card-icon">😎</span>
+      <div class="diff-card-info">
+        <h3>Médio</h3>
+        <p>Divisões por 2 a 6 · Pizzas maiores</p>
+      </div>
+      <span class="diff-card-badge badge-orange">Intermediário</span>
+    </div>
+    <div class="diff-card dificil" onclick="startGame('dificil')">
+      <span class="diff-card-icon">🤯</span>
+      <div class="diff-card-info">
+        <h3>Difícil</h3>
+        <p>Divisões por 2 a 9 · Desafio total</p>
+      </div>
+      <span class="diff-card-badge badge-red">Avançado</span>
+    </div>
+  </div>
+</div>
+
+<!-- TUTORIAL SCREEN -->
+<div class="screen" id="screenTuto">
+  <div class="tuto-box">
+    <h2>🍕 Como Jogar</h2>
+    <div class="tuto-steps">
+      <div class="tuto-step">
+        <div class="tuto-step-num">1</div>
+        <p>Você verá uma pizza dividida em fatias e quantas pessoas vão comer.</p>
+      </div>
+      <div class="tuto-step">
+        <div class="tuto-step-num">2</div>
+        <p>Calcule quantas fatias cada pessoa vai receber se dividirem igualmente.</p>
+      </div>
+      <div class="tuto-step">
+        <div class="tuto-step-num">3</div>
+        <p>Clique na resposta correta antes do tempo acabar!</p>
+      </div>
+      <div class="tuto-step">
+        <div class="tuto-step-num">4</div>
+        <p>Acertando rápido você ganha mais pontos e estrelas!</p>
+      </div>
+    </div>
+    <button class="btn btn-pizza" style="width:100%; font-size:18px; padding:16px;" onclick="beginGame()">Vamos Começar! 🍕</button>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div class="screen" id="screenGame">
+  <div class="game-top">
+    <button class="game-back" onclick="goBack()">←</button>
+    <span class="game-title">🍕 Pizzaria da Divisão</span>
+    <div class="game-score">⭐ <span id="scoreDisplay">0</span></div>
+  </div>
+
+  <div class="timer-bar-wrap">
+    <div class="timer-bar" id="timerBar"></div>
+  </div>
+
+  <div class="progress-text" id="progressText">Pergunta 1 de 5</div>
+
+  <div class="question-card">
+    <p id="questionText">Uma pizza tem fatias...</p>
+    <div class="equation" id="equationText">12 ÷ 3 = ?</div>
+  </div>
+
+  <div class="pizza-wrap">
+    <svg id="pizzaSvg" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <div class="hint-bar" id="hintBar"></div>
+
+  <div class="answer-grid" id="answerGrid"></div>
+</div>
+
+<!-- VICTORY SCREEN -->
+<div class="screen" id="screenVic">
+  <div class="vic-card">
+    <span class="vic-emoji" id="vicEmoji">🎉</span>
+    <h2 id="vicTitle">Parabéns!</h2>
+    <p id="vicMsg">Você concluiu a Pizzaria da Divisão!</p>
+    <div class="vic-stars" id="vicStars">⭐⭐⭐</div>
+    <div class="vic-stats">
+      <div class="vic-stat">
+        <span class="stat-num" id="statCorrect">0</span>
+        <span class="stat-label">Acertos</span>
+      </div>
+      <div class="vic-stat">
+        <span class="stat-num" id="statTotal">0</span>
+        <span class="stat-label">Questões</span>
+      </div>
+      <div class="vic-stat">
+        <span class="stat-num" id="statScore">0</span>
+        <span class="stat-label">Pontos</span>
+      </div>
+    </div>
+    <div class="vic-btns">
+      <button class="btn btn-outline" onclick="goToDiff()">Mudar Nível</button>
+      <button class="btn btn-pizza" onclick="restartGame()">Jogar Novamente</button>
+      <button class="btn btn-primary" onclick="window.location.href='../dashboard.html'">Início</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const LEVELS = {
+    facil:   { name: 'Fácil',   questions: 5, timePerQ: 22, divisors: [2, 3, 4],             maxAnswer: 6  },
+    medio:   { name: 'Médio',   questions: 7, timePerQ: 16, divisors: [2, 3, 4, 5, 6],       maxAnswer: 7  },
+    dificil: { name: 'Difícil', questions: 8, timePerQ: 12, divisors: [3, 4, 5, 6, 7, 8, 9], maxAnswer: 9  },
+  };
+
+  const GROUP_COLORS = [
+    '#E53935', '#FB8C00', '#FDD835', '#43A047',
+    '#00ACC1', '#3949AB', '#8E24AA', '#F06292', '#6D4C41'
+  ];
+
+  const adaptive = {
+    history: [], diffMod: 0, hintLevel: 0,
+    reset() { this.history = []; this.diffMod = 0; this.hintLevel = 0; },
+    record(correct, fast = false) {
+      const pts = correct ? (fast ? 2 : 1) : -1;
+      this.history.push(pts);
+      if (this.history.length > 5) this.history.shift();
+      if (this.history.length >= 3) this._evaluate();
+    },
+    _evaluate() {
+      const sum = this.history.reduce((a, b) => a + b, 0);
+      if (sum <= -3) {
+        this.diffMod = Math.max(-2, this.diffMod - 1);
+        this.hintLevel = Math.min(2, this.hintLevel + 1);
+      } else if (sum >= 5) {
+        this.diffMod = Math.min(2, this.diffMod + 1);
+        this.hintLevel = Math.max(0, this.hintLevel - 1);
+      } else if (sum >= 3 && this.hintLevel > 0) {
+        this.hintLevel = Math.max(0, this.hintLevel - 1);
+      }
+    }
+  };
+
+  let levelKey, level, qIndex, totalQ, score, correctCount;
+  let timerInterval, timeLeft, effectiveTime;
+  let currentQ, answered, questionStart;
+  let hint1Timer, hint2Timer;
+
+  function startGame(key) {
+    levelKey = key;
+    level = LEVELS[key];
+    adaptive.reset();
+    showScreen('screenTuto');
+  }
+
+  function beginGame() {
+    qIndex = 0;
+    totalQ = level.questions;
+    score = 0;
+    correctCount = 0;
+    document.getElementById('scoreDisplay').textContent = '0';
+    showScreen('screenGame');
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    answered = false;
+    clearInterval(timerInterval);
+    clearTimeout(hint1Timer);
+    clearTimeout(hint2Timer);
+    hideHintBar();
+
+    const dm = adaptive.diffMod;
+    effectiveTime = Math.max(6, Math.min(30, level.timePerQ - dm * 2));
+
+    let divPool = level.divisors;
+    if (dm <= -2)      divPool = divPool.slice(0, Math.min(2, divPool.length));
+    else if (dm === -1) divPool = divPool.slice(0, Math.max(2, Math.ceil(divPool.length * 0.7)));
+
+    const divisor = divPool[Math.floor(Math.random() * divPool.length)];
+
+    let maxAns = level.maxAnswer;
+    if (dm <= -2)      maxAns = Math.max(2, maxAns - 3);
+    else if (dm === -1) maxAns = Math.max(2, maxAns - 1);
+    else if (dm >= 1)  maxAns = Math.min(12, maxAns + dm);
+
+    const answer = Math.floor(Math.random() * (maxAns - 1)) + 2;
+    const dividend = divisor * answer;
+
+    currentQ = { dividend, divisor, answer };
+    questionStart = Date.now();
+
+    document.getElementById('progressText').textContent = `Pergunta ${qIndex + 1} de ${totalQ}`;
+    const pessoas = divisor === 1 ? 'pessoa' : 'pessoas';
+    document.getElementById('questionText').textContent =
+      `Uma pizza tem ${dividend} fatias. ${divisor} ${pessoas} vão dividir igualmente.`;
+    document.getElementById('equationText').textContent = `${dividend} ÷ ${divisor} = ?`;
+
+    drawPizza(dividend, divisor, false);
+    buildAnswerButtons(answer);
+
+    if (adaptive.hintLevel >= 1) {
+      hint1Timer = setTimeout(() => {
+        if (!answered) showHintBar('💡 Dica: conte quantas fatias existem em cada parte!');
+      }, effectiveTime * 350);
+    }
+    if (adaptive.hintLevel >= 2) {
+      hint2Timer = setTimeout(() => {
+        if (!answered) {
+          drawPizza(currentQ.dividend, currentQ.divisor, true);
+          showHintBar('💡 Cada cor é a parte de uma pessoa — conte as fatias de uma cor!');
+        }
+      }, effectiveTime * 600);
+    }
+
+    startTimer();
+  }
+
+  function startTimer() {
+    timeLeft = effectiveTime;
+    updateTimerBar(1);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      updateTimerBar(timeLeft / effectiveTime);
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        onTimeUp();
+      }
+    }, 1000);
+  }
+
+  function updateTimerBar(frac) {
+    const bar = document.getElementById('timerBar');
+    bar.style.width = (frac * 100) + '%';
+    bar.classList.toggle('warn',   frac < 0.5 && frac >= 0.25);
+    bar.classList.toggle('danger', frac < 0.25);
+  }
+
+  function buildAnswerButtons(correct) {
+    const grid = document.getElementById('answerGrid');
+    grid.innerHTML = '';
+    generateOptions(correct).forEach(val => {
+      const btn = document.createElement('button');
+      btn.className = 'answer-btn';
+      btn.textContent = val;
+      btn.onclick = () => onAnswer(btn, val, correct);
+      grid.appendChild(btn);
+    });
+  }
+
+  function generateOptions(correct) {
+    const pool = new Set();
+    for (let off = 1; off <= 8; off++) {
+      if (correct - off > 0) pool.add(correct - off);
+      pool.add(correct + off);
+    }
+    pool.delete(correct);
+    const arr = shuffle([...pool]).slice(0, 3);
+    return shuffle([correct, ...arr]);
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function onAnswer(btn, val, correct) {
+    if (answered) return;
+    answered = true;
+    clearInterval(timerInterval);
+    clearTimeout(hint1Timer);
+    clearTimeout(hint2Timer);
+
+    const elapsed = (Date.now() - questionStart) / 1000;
+    const fast = elapsed < effectiveTime * 0.4;
+
+    document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true);
+
+    if (val === correct) {
+      btn.classList.add('correct');
+      correctCount++;
+      const pts = fast ? 15 : 10;
+      score += pts;
+      document.getElementById('scoreDisplay').textContent = score;
+      adaptive.record(true, fast);
+      playSound('correct');
+      drawPizza(currentQ.dividend, currentQ.divisor, true);
+      setTimeout(nextQuestion, 1300);
+    } else {
+      btn.classList.add('wrong');
+      document.querySelectorAll('.answer-btn').forEach(b => {
+        if (parseInt(b.textContent) === correct) b.classList.add('correct');
+      });
+      adaptive.record(false);
+      playSound('wrong');
+      setTimeout(nextQuestion, 1600);
+    }
+  }
+
+  function onTimeUp() {
+    if (answered) return;
+    answered = true;
+    clearTimeout(hint1Timer);
+    clearTimeout(hint2Timer);
+    document.querySelectorAll('.answer-btn').forEach(b => {
+      if (parseInt(b.textContent) === currentQ.answer) b.classList.add('correct');
+      b.disabled = true;
+    });
+    adaptive.record(false);
+    playSound('wrong');
+    setTimeout(nextQuestion, 1600);
+  }
+
+  function nextQuestion() {
+    qIndex++;
+    if (qIndex >= totalQ) showVictory();
+    else loadQuestion();
+  }
+
+  // ===== PIZZA SVG DRAWING =====
+  function drawPizza(dividend, divisor, revealGroups) {
+    const svg = document.getElementById('pizzaSvg');
+    svg.innerHTML = '';
+    const cx = 120, cy = 120, r = 100, cr = 114;
+
+    const mk = tag => document.createElementNS('http://www.w3.org/2000/svg', tag);
+    const sa = (el, attrs) => Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+
+    const crust = mk('circle');
+    sa(crust, { cx, cy, r: cr, fill: '#D7A050', stroke: '#8B5E3C', 'stroke-width': '2' });
+    svg.appendChild(crust);
+
+    const base = mk('circle');
+    sa(base, { cx, cy, r, fill: '#F9C843' });
+    svg.appendChild(base);
+
+    const sauce = mk('circle');
+    sa(sauce, { cx: cx - 8, cy: cy - 8, r: 62, fill: '#E8A020', 'fill-opacity': '0.28' });
+    svg.appendChild(sauce);
+
+    const sectionAngle = (2 * Math.PI) / divisor;
+    const sliceAngle   = (2 * Math.PI) / dividend;
+    const showSlices   = dividend <= 24;
+
+    if (revealGroups) {
+      for (let g = 0; g < divisor; g++) {
+        const startA = g * sectionAngle - Math.PI / 2;
+        const endA   = (g + 1) * sectionAngle - Math.PI / 2;
+        const la = sectionAngle > Math.PI ? 1 : 0;
+        const x1 = cx + r * Math.cos(startA), y1 = cy + r * Math.sin(startA);
+        const x2 = cx + r * Math.cos(endA),   y2 = cy + r * Math.sin(endA);
+        const path = mk('path');
+        sa(path, {
+          d: `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${la} 1 ${x2} ${y2} Z`,
+          fill: GROUP_COLORS[g % GROUP_COLORS.length], 'fill-opacity': '0.42'
+        });
+        svg.appendChild(path);
+      }
+    }
+
+    if (showSlices && (levelKey === 'facil' || revealGroups || adaptive.hintLevel >= 2)) {
+      for (let i = 0; i < dividend; i++) {
+        const a = i * sliceAngle - Math.PI / 2;
+        const lx = cx + r * Math.cos(a), ly = cy + r * Math.sin(a);
+        const line = mk('line');
+        sa(line, { x1: cx, y1: cy, x2: lx, y2: ly, stroke: '#8B5E3C', 'stroke-width': '1.2', 'stroke-opacity': '0.55' });
+        svg.appendChild(line);
+      }
+    }
+
+    for (let g = 0; g < divisor; g++) {
+      const a  = g * sectionAngle - Math.PI / 2;
+      const lx = cx + r * Math.cos(a), ly = cy + r * Math.sin(a);
+      const line = mk('line');
+      sa(line, { x1: cx, y1: cy, x2: lx, y2: ly, stroke: '#5D3B1E', 'stroke-width': '3' });
+      svg.appendChild(line);
+    }
+
+    if (dividend <= 18) {
+      const tR = 8;
+      for (let i = 0; i < Math.min(dividend, 9); i++) {
+        const a  = (i + 0.5) * sliceAngle - Math.PI / 2;
+        const tr = r * 0.6;
+        const tx = cx + tr * Math.cos(a), ty = cy + tr * Math.sin(a);
+        const c  = mk('circle');
+        sa(c, { cx: tx, cy: ty, r: tR, fill: '#C62828', 'fill-opacity': '0.88' });
+        svg.appendChild(c);
+        const hl = mk('circle');
+        sa(hl, { cx: tx - 2, cy: ty - 2, r: 3, fill: '#fff', 'fill-opacity': '0.35' });
+        svg.appendChild(hl);
+      }
+    }
+
+    const outline = mk('circle');
+    sa(outline, { cx, cy, r, fill: 'none', stroke: '#5D3B1E', 'stroke-width': '2.5' });
+    svg.appendChild(outline);
+
+    const cdot = mk('circle');
+    sa(cdot, { cx, cy, r: 4, fill: '#5D3B1E' });
+    svg.appendChild(cdot);
+  }
+
+  // ===== VICTORY SCREEN =====
+  function showVictory() {
+    clearInterval(timerInterval);
+    const pct = correctCount / totalQ;
+    let stars, emoji, title, msg;
+    if (pct >= 0.8) {
+      stars = '⭐⭐⭐'; emoji = '🏆';
+      title = 'Incrível Pizzaiolo!';
+      msg = 'Você é um mestre da divisão de pizzas!';
+    } else if (pct >= 0.5) {
+      stars = '⭐⭐'; emoji = '🎉';
+      title = 'Muito Bem!';
+      msg = 'Continue treinando para ser um mestre!';
+    } else {
+      stars = '⭐'; emoji = '💪';
+      title = 'Bom Esforço!';
+      msg = 'Tente novamente e você vai melhorar!';
+    }
+    document.getElementById('vicEmoji').textContent  = emoji;
+    document.getElementById('vicTitle').textContent  = title;
+    document.getElementById('vicMsg').textContent    = msg;
+    document.getElementById('vicStars').textContent  = stars;
+    document.getElementById('statCorrect').textContent = correctCount;
+    document.getElementById('statTotal').textContent   = totalQ;
+    document.getElementById('statScore').textContent   = score;
+    showScreen('screenVic');
+  }
+
+  // ===== HELPERS =====
+  function showHintBar(text) {
+    const bar = document.getElementById('hintBar');
+    bar.textContent = text;
+    bar.classList.add('show');
+  }
+  function hideHintBar() {
+    document.getElementById('hintBar').classList.remove('show');
+  }
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+  function goBack()    { clearInterval(timerInterval); showScreen('screenDiff'); }
+  function goToDiff()  { showScreen('screenDiff'); }
+  function restartGame() { beginGame(); }
+
+  // ===== SOUNDS =====
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let actx;
+  function getCtx() { if (!actx) actx = new AudioCtx(); return actx; }
+  function playSound(type) {
+    try {
+      const ctx = getCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      if (type === 'correct') {
+        osc.frequency.setValueAtTime(523, ctx.currentTime);
+        osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
+        osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.14, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.5);
+      } else {
+        osc.frequency.setValueAtTime(300, ctx.currentTime);
+        osc.frequency.setValueAtTime(200, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.14, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.3);
+      }
+    } catch(e) {}
+  }
+</script>
+<script src="../nipo.js"></script>
+</body>
+</html>

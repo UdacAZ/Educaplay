@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Labirinto das Letras – EducaPlay</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --blue: #7EC8E3; --blue-dark: #4A9EC4; --blue-deeper: #2A7FA8;
+      --blue-light: #B8E4F2; --blue-bg: #EBF7FC;
+      --green: #4CAF50; --green-dark: #2E7D32;
+      --red: #F44336; --white: #fff; --text: #2d3a4a;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Nunito', sans-serif; background: var(--blue-bg); color: var(--text); min-height: 100vh; }
+
+    .screen { display: none; min-height: 100vh; flex-direction: column; }
+    .screen.active { display: flex; }
+
+    .game-header {
+      background: var(--blue-dark); color: white;
+      padding: 14px 24px; display: flex; align-items: center; gap: 14px; flex-shrink: 0;
+    }
+    .game-header a { color: white; text-decoration: none; font-size: 1.5rem; }
+    .game-header h1 { font-size: 1.15rem; font-weight: 800; }
+
+    /* DIFFICULTY */
+    .diff-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; gap: 32px; }
+    .diff-heading { text-align: center; }
+    .diff-heading h2 { font-size: 2rem; font-weight: 900; color: var(--blue-deeper); margin-bottom: 6px; }
+    .diff-heading p { color: #666; }
+    .diff-cards { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+    .diff-card { background: white; border-radius: 20px; padding: 32px 28px; width: 190px; text-align: center; cursor: pointer; border: 3px solid transparent; box-shadow: 0 4px 16px rgba(74,158,196,0.15); transition: all .2s; }
+    .diff-card:hover { border-color: var(--blue-dark); transform: translateY(-5px); }
+    .diff-emoji { font-size: 2.8rem; margin-bottom: 12px; }
+    .diff-name  { font-size: 1.2rem; font-weight: 900; color: var(--blue-deeper); margin-bottom: 6px; }
+    .diff-desc  { font-size: 0.82rem; color: #777; line-height: 1.5; }
+
+    /* TUTORIAL */
+    .tutorial-body { flex: 1; display: flex; align-items: center; justify-content: center; padding: 32px 20px; }
+    .tutorial-wrap { background: white; border-radius: 24px; padding: 40px 36px; max-width: 540px; width: 100%; box-shadow: 0 8px 32px rgba(74,158,196,0.15); }
+    .tutorial-head { text-align: center; margin-bottom: 28px; }
+    .tutorial-head .t-icon { font-size: 3rem; margin-bottom: 8px; }
+    .tutorial-head h2 { font-size: 1.55rem; font-weight: 900; color: var(--blue-deeper); margin-bottom: 6px; }
+    .tutorial-head p { color: #666; }
+    .steps-list { margin-bottom: 24px; }
+    .t-step { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+    .t-step-num { background: var(--blue-dark); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.88rem; flex-shrink: 0; }
+    .t-step-text { padding-top: 4px; color: #444; line-height: 1.5; }
+    .t-step-text strong { color: var(--blue-deeper); }
+    .key-hint { display: inline-flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+    .key { background: #eee; border: 2px solid #ccc; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 700; }
+
+    /* GAME SCREEN */
+    .game-top { background: var(--blue-dark); color: white; padding: 10px 20px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .g-back { background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; }
+    .g-title { font-size: 1rem; font-weight: 800; flex: 1; }
+
+    .canvas-wrap { flex: 1; position: relative; overflow: hidden; background: #87CEEB; }
+    canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+    /* MOBILE CONTROLS */
+    #mobileCtrl { position: absolute; bottom: 12px; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; pointer-events: none; }
+    .ctrl-group { display: flex; gap: 10px; }
+    .ctrl-btn {
+      width: 58px; height: 58px; border-radius: 50%; border: none;
+      background: rgba(74,158,196,0.85); color: white; font-size: 22px;
+      cursor: pointer; user-select: none; touch-action: none;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .ctrl-btn { pointer-events: all; }
+    .ctrl-btn:active { background: rgba(42,127,168,0.9); transform: scale(0.93); }
+    #btnReplay { background: rgba(255,140,66,0.85); font-size: 18px; width: 52px; height: 52px; }
+
+    /* VICTORY */
+    .victory-body { flex: 1; display: flex; align-items: center; justify-content: center; padding: 32px 20px; }
+    .victory-card { background: white; border-radius: 28px; padding: 40px 32px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 8px 40px rgba(74,158,196,0.2); }
+    .victory-emoji { font-size: 76px; margin-bottom: 14px; display: block; }
+    .victory-card h2 { font-size: 2rem; font-weight: 900; color: var(--blue-deeper); margin-bottom: 8px; }
+    .victory-card > p { color: #708090; margin-bottom: 20px; }
+    .victory-stars { font-size: 48px; letter-spacing: 6px; margin-bottom: 22px; }
+    .victory-stats { display: flex; gap: 14px; justify-content: center; margin-bottom: 28px; flex-wrap: wrap; }
+    .v-stat { background: var(--blue-bg); border-radius: 14px; padding: 14px 22px; }
+    .v-stat .v-num   { font-size: 30px; font-weight: 900; color: var(--blue-deeper); display: block; }
+    .v-stat .v-label { font-size: 12px; color: #708090; }
+    .victory-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn { border: none; border-radius: 14px; padding: 14px 28px; font-size: 16px; font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif; transition: all .2s; }
+    .btn-primary { background: var(--blue-dark); color: white; }
+    .btn-primary:hover { background: var(--blue-deeper); transform: translateY(-2px); }
+    .btn-outline { background: transparent; color: var(--blue-dark); border: 2px solid var(--blue-dark); }
+    .btn-outline:hover { background: var(--blue-bg); }
+    .btn-green { background: var(--green); color: white; }
+    .btn-green:hover { background: var(--green-dark); transform: translateY(-2px); }
+    .btn-start { width: 100%; padding: 15px; background: var(--blue-dark); color: white; border: none; border-radius: 14px; font-size: 1.1rem; font-weight: 800; font-family: 'Nunito', sans-serif; cursor: pointer; transition: background .2s, transform .15s; }
+    .btn-start:hover { background: var(--blue-deeper); transform: translateY(-2px); }
+
+    @media (max-width: 500px) { .diff-card { width: 100%; max-width: 300px; } }
+    @media (hover: hover) { #mobileCtrl { display: none !important; } }
+  </style>
+</head>
+<body>
+
+<!-- SCREEN 1: DIFFICULTY -->
+<div class="screen active" id="screenDiff">
+  <div class="game-header">
+    <a href="../dashboard.html">←</a>
+    <h1>🎮 Labirinto das Letras</h1>
+  </div>
+  <div class="diff-body">
+    <div class="diff-heading">
+      <h2>Escolha a Dificuldade</h2>
+      <p>Colete as letras na ordem certa para formar a palavra!</p>
+    </div>
+    <div class="diff-cards">
+      <div class="diff-card" onclick="startGame('facil')">
+        <div class="diff-emoji">🌟</div>
+        <div class="diff-name">Fácil</div>
+        <div class="diff-desc">Palavra visível<br>Próxima letra brilha<br>5 palavras</div>
+      </div>
+      <div class="diff-card" onclick="startGame('medio')">
+        <div class="diff-emoji">🔥</div>
+        <div class="diff-name">Médio</div>
+        <div class="diff-desc">Mais letras falsas<br>Sem dica de brilho<br>6 palavras</div>
+      </div>
+      <div class="diff-card" onclick="startGame('dificil')">
+        <div class="diff-emoji">💎</div>
+        <div class="diff-name">Difícil</div>
+        <div class="diff-desc">Palavra só no áudio<br>Muitas letras falsas<br>8 palavras</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: TUTORIAL -->
+<div class="screen" id="screenTuto">
+  <div class="game-header">
+    <a href="#" onclick="showScreen('screenDiff');return false;">←</a>
+    <h1>🎮 Como Jogar</h1>
+  </div>
+  <div class="tutorial-body">
+    <div class="tutorial-wrap">
+      <div class="tutorial-head">
+        <div class="t-icon">🎮</div>
+        <h2>Labirinto das Letras</h2>
+        <p>Mova o personagem e colete as letras na ordem certa!</p>
+      </div>
+      <div class="steps-list">
+        <div class="t-step">
+          <div class="t-step-num">1</div>
+          <div class="t-step-text">
+            Use o teclado para mover:
+            <div class="key-hint">
+              <span class="key">◀</span><span class="key">▶</span> mover
+              <span class="key">▲</span> ou <span class="key">Espaço</span> pular
+            </div>
+          </div>
+        </div>
+        <div class="t-step">
+          <div class="t-step-num">2</div>
+          <div class="t-step-text">Veja a <strong>palavra alvo</strong> no topo e colete as letras <strong>na ordem certa</strong>.</div>
+        </div>
+        <div class="t-step">
+          <div class="t-step-num">3</div>
+          <div class="t-step-text">Letra <strong>errada ou fora de ordem</strong>? Perde uma vida! ❤️</div>
+        </div>
+        <div class="t-step">
+          <div class="t-step-num">4</div>
+          <div class="t-step-text">Complete todas as palavras para <strong>vencer</strong>!</div>
+        </div>
+      </div>
+      <button class="btn-start" onclick="beginGame()">Jogar! 🎮</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3: GAME -->
+<div class="screen" id="screenGame">
+  <div class="game-top">
+    <button class="g-back" onclick="goBack()">←</button>
+    <span class="g-title">🎮 Labirinto das Letras</span>
+  </div>
+  <div class="canvas-wrap">
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <div id="mobileCtrl">
+      <div class="ctrl-group">
+        <button class="ctrl-btn" id="btnLeft">◀</button>
+        <button class="ctrl-btn" id="btnRight">▶</button>
+      </div>
+      <button class="ctrl-btn" id="btnReplay" style="display:none" onclick="replayWord()">🔊</button>
+      <button class="ctrl-btn" id="btnJump">▲</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 4: VICTORY -->
+<div class="screen" id="screenVic">
+  <div class="game-header">
+    <a href="../dashboard.html">←</a>
+    <h1>🎮 Labirinto das Letras</h1>
+  </div>
+  <div class="victory-body">
+    <div class="victory-card">
+      <span class="victory-emoji" id="vicEmoji">🏆</span>
+      <h2 id="vicTitle">Parabéns!</h2>
+      <p id="vicMsg">Você completou o labirinto!</p>
+      <div class="victory-stars" id="vicStars">⭐⭐⭐</div>
+      <div class="victory-stats">
+        <div class="v-stat"><span class="v-num" id="statWords">0</span><span class="v-label">Palavras</span></div>
+        <div class="v-stat"><span class="v-num" id="statScore">0</span><span class="v-label">Pontos</span></div>
+      </div>
+      <div class="victory-btns">
+        <button class="btn btn-outline" onclick="showScreen('screenDiff')">Mudar Nível</button>
+        <button class="btn btn-green"   onclick="beginGame()">Jogar Novamente</button>
+        <button class="btn btn-primary" onclick="window.location.href='../dashboard.html'">Início</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONSTANTS
+// ============================================================
+let CW = 800, CH = 400;
+const HUD_H = 44;
+let GND_Y = 356;
+const GRAV  = 0.52;         // gravity px/frame²
+const JUMP_V = -12.5;       // initial jump velocity
+const WALK_SPD = 4.2;       // max walk speed
+const PW = 26, PH = 36;    // player size
+const TW = 38, TH = 38;    // letter tile size
+const PLAT_H = 14;          // platform thickness
+
+// ============================================================
+// WORD DATABASE
+// ============================================================
+const WORDS = {
+  facil: [
+    {emoji:'⚽',word:'BOLA'}, {emoji:'🏠',word:'CASA'}, {emoji:'🐱',word:'GATO'},
+    {emoji:'🦆',word:'PATO'}, {emoji:'🧳',word:'MALA'}, {emoji:'🕯️',word:'VELA'},
+    {emoji:'👆',word:'DEDO'}, {emoji:'🌹',word:'ROSA'}, {emoji:'🐸',word:'SAPO'},
+    {emoji:'🐺',word:'LOBO'}, {emoji:'🗺️',word:'MAPA'}, {emoji:'🎂',word:'BOLO'},
+  ],
+  medio: [
+    {emoji:'🐍',word:'COBRA'}, {emoji:'🐟',word:'PEIXE'}, {emoji:'📚',word:'LIVRO'},
+    {emoji:'🍃',word:'FOLHA'}, {emoji:'🐯',word:'TIGRE'}, {emoji:'🚪',word:'PORTA'},
+    {emoji:'🏖️',word:'PRAIA'}, {emoji:'🌧️',word:'CHUVA'}, {emoji:'🍓',word:'FRUTA'},
+    {emoji:'🪨',word:'PEDRA'}, {emoji:'🎪',word:'CIRCO'}, {emoji:'🌙',word:'NOITE'},
+  ],
+  dificil: [
+    {emoji:'🏫',word:'ESCOLA'}, {emoji:'🪟',word:'JANELA'}, {emoji:'👟',word:'SAPATO'},
+    {emoji:'🪆',word:'BONECA'}, {emoji:'🐴',word:'CAVALO'}, {emoji:'🐒',word:'MACACO'},
+    {emoji:'🦒',word:'GIRAFA'}, {emoji:'🍅',word:'TOMATE'}, {emoji:'🥕',word:'CENOURA'},
+    {emoji:'🎭',word:'TEATRO'},
+  ],
+};
+
+const DIFF_CFG = {
+  facil:   {questions:5,  distractors:2, showWord:true,  hint:true,  platHeights:['low']},
+  medio:   {questions:6,  distractors:4, showWord:true,  hint:false, platHeights:['low','mid']},
+  dificil: {questions:8,  distractors:6, showWord:false, hint:false, platHeights:['low','mid','high']},
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let canvas, ctx, rafId;
+let levelKey, cfg, questionPool, qIdx, score, wordsCompleted;
+let player, cam, platforms, tiles, levelW;
+let targetWord, wordEmoji, nextLetterIdx, lives, livesLost;
+let gamePhase; // 'playing' | 'wordComplete' | 'gameover'
+let phaseTimer = 0;
+let flashScreen = 0; // frames of red flash
+let hintActive = false; // adaptive: show hint even in non-easy modes
+let wrongThisWord = 0;
+
+const keys = {};
+const mobileKeys = { left:false, right:false, jump:false, jumpUsed:false };
+
+// ============================================================
+// SPRITES
+// ============================================================
+const SPRITE_PATH = '../Sprite dos jogos/Labirinto das Letras (Plataforma)/';
+const SPRITE_DATA = {
+  idle: { file:'IDLE.png', frames:8, fw:84, fh:84, speed:8  },
+  walk: { file:'WALK.png', frames:8, fw:96, fh:84, speed:5  },
+  run:  { file:'RUN.png',  frames:8, fw:96, fh:84, speed:4  },
+  jump: { file:'JUMP.png', frames:5, fw:96, fh:84, speed:7  },
+  hurt: { file:'HURT.png', frames:4, fw:96, fh:84, speed:5  },
+};
+const sprites = {};
+let spritesLoaded = false;
+
+function preloadSprites() {
+  if (spritesLoaded) return Promise.resolve();
+  const all = Object.entries(SPRITE_DATA).map(([key, sd]) =>
+    new Promise(res => {
+      const img = new Image();
+      img.onload  = () => { sprites[key] = img; res(); };
+      img.onerror = res;
+      img.src = SPRITE_PATH + sd.file;
+    })
+  );
+  return Promise.all(all).then(() => { spritesLoaded = true; });
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function rndRect(ctx, x, y, w, h, r) {
+  r = Math.min(r, w/2, h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y); ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h);   ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r);     ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+function clamp(v,lo,hi) { return Math.max(lo,Math.min(hi,v)); }
+function shuffle(a) { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a; }
+function rnd(lo,hi) { return Math.floor(Math.random()*(hi-lo+1))+lo; }
+function overlaps(ax,ay,aw,ah,bx,by,bw,bh) { return ax<bx+bw&&ax+aw>bx&&ay<by+bh&&ay+ah>by; }
+
+// ============================================================
+// AUDIO
+// ============================================================
+const ACtx = window.AudioContext||window.webkitAudioContext;
+let actx;
+function getActx() { if(!actx) actx=new ACtx(); return actx; }
+function beep(freq,dur,vol=0.12) {
+  try {
+    const c=getActx(), o=c.createOscillator(), g=c.createGain();
+    o.connect(g); g.connect(c.destination);
+    o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
+    o.start(c.currentTime); o.stop(c.currentTime+dur);
+  } catch(e){}
+}
+function playCorrect() { beep(523,0.08); setTimeout(()=>beep(659,0.08),90); setTimeout(()=>beep(784,0.15),180); }
+function playWrong()   { beep(300,0.15); setTimeout(()=>beep(200,0.2),160); }
+function playJump()    { beep(440,0.06,0.07); setTimeout(()=>beep(520,0.05,0.05),60); }
+function playWin()     { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,0.2),i*120)); }
+
+function speakWord(word) {
+  try {
+    if(!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(word.toLowerCase());
+    u.lang='pt-BR'; u.rate=0.75; u.pitch=1.1;
+    speechSynthesis.speak(u);
+  } catch(e){}
+}
+
+// ============================================================
+// LEVEL BUILDING
+// ============================================================
+const PLAT_HEIGHTS = { low: ()=>GND_Y-rnd(70,88), mid: ()=>GND_Y-rnd(128,148), high: ()=>GND_Y-rnd(178,198) };
+
+function getDistractors(word, n) {
+  const used = new Set([...word]);
+  const pool = [...'BCDFGHJKLMNPQRSTVXYZ'].filter(c=>!used.has(c));
+  return shuffle(pool).slice(0,n);
+}
+
+function buildLevel() {
+  const entry = questionPool[qIdx];
+  targetWord = entry.word;
+  wordEmoji  = entry.emoji;
+  nextLetterIdx = 0;
+  lives = 3;
+  livesLost = 0;
+  wrongThisWord = 0;
+  hintActive = false;
+  gamePhase = 'playing';
+  phaseTimer = 0;
+  flashScreen = 0;
+
+  const distractorCount = cfg.distractors;
+  const totalTiles = targetWord.length + distractorCount;
+  levelW = 320 + totalTiles * 205;
+
+  // Ground
+  platforms = [{ x:-200, y:GND_Y, w:levelW+400, h:CH-GND_Y+10, isGround:true }];
+
+  // Floating platforms — one per tile
+  const startX = 130, endX = levelW - 80;
+  const spacing = (endX - startX) / (totalTiles + 1);
+  const floatPlats = [];
+  const heights = cfg.platHeights;
+
+  for (let i = 0; i < totalTiles; i++) {
+    const px = startX + (i+1)*spacing + rnd(-20,20);
+    const hKey = heights[i % heights.length];
+    // For difícil alternate low/high to ensure reachability
+    const py = PLAT_HEIGHTS[hKey]();
+    const pw = rnd(78,118);
+    floatPlats.push({ x:px, y:py, w:pw, h:PLAT_H, isGround:false });
+    platforms.push({ x:px, y:py, w:pw, h:PLAT_H, isGround:false });
+  }
+
+  // Create tiles
+  const correctTiles = [...targetWord].map((char,si) => ({ char, seqIdx:si, isDistractor:false, collected:false }));
+  const distTiles    = getDistractors(targetWord, distractorCount).map(char => ({ char, seqIdx:-1, isDistractor:true, collected:false }));
+  const allTiles     = shuffle([...correctTiles, ...distTiles]);
+
+  tiles = floatPlats.map((p,i) => ({
+    ...allTiles[i],
+    wx: p.x + p.w/2 - TW/2,
+    wy: p.y - TH - 3,
+  }));
+
+  // Reset player
+  player = { x:50, y:GND_Y-PH, vx:0, vy:0, onGround:false, facing:1, anim:0, hitFlash:0 };
+  cam = { x:0 };
+}
+
+// ============================================================
+// PHYSICS
+// ============================================================
+function updatePhysics() {
+  const left  = keys['ArrowLeft']  || keys['a'] || keys['A'] || mobileKeys.left;
+  const right = keys['ArrowRight'] || keys['d'] || keys['D'] || mobileKeys.right;
+  const jump  = keys['ArrowUp'] || keys['w'] || keys['W'] || keys[' '] || mobileKeys.jump;
+
+  // Horizontal
+  if (left)  { player.vx -= 1.2; player.facing = -1; }
+  if (right) { player.vx += 1.2; player.facing =  1; }
+  player.vx = clamp(player.vx, -WALK_SPD, WALK_SPD);
+  if (!left && !right) player.vx *= 0.72;
+
+  // Jump
+  if (jump && player.onGround && !mobileKeys.jumpUsed) {
+    player.vy = JUMP_V;
+    player.onGround = false;
+    mobileKeys.jumpUsed = true;
+    playJump();
+  }
+  if (!jump) mobileKeys.jumpUsed = false;
+
+  player.anim++;
+
+  // Gravity
+  player.vy += GRAV;
+  player.vy = Math.min(player.vy, 18); // terminal velocity
+
+  // Move
+  player.x += player.vx;
+  player.y += player.vy;
+
+  // Clamp to level
+  player.x = Math.max(0, Math.min(player.x, levelW - PW));
+
+  // Fall off world
+  if (player.y > CH + 80) {
+    onHitPlayer();
+    respawnPlayer();
+    return;
+  }
+
+  // Platform collision (top only)
+  player.onGround = false;
+  for (const p of platforms) {
+    const pBottom = player.y + PH;
+    if (player.x + PW > p.x && player.x < p.x + p.w) {
+      if (player.vy >= 0 && pBottom >= p.y && pBottom <= p.y + PLAT_H + Math.abs(player.vy) + 2) {
+        player.y = p.y - PH;
+        player.vy = 0;
+        player.onGround = true;
+      }
+    }
+  }
+
+  // Camera
+  const targetCamX = player.x + PW/2 - CW/2;
+  cam.x += (targetCamX - cam.x) * 0.12;
+  cam.x = clamp(cam.x, 0, Math.max(0, levelW - CW));
+
+  // Hit flash countdown
+  if (player.hitFlash > 0) player.hitFlash--;
+}
+
+function respawnPlayer() {
+  player.x = 50; player.y = GND_Y - PH;
+  player.vx = 0; player.vy = 0;
+  player.hitFlash = 40;
+  cam.x = 0;
+}
+
+// ============================================================
+// TILE COLLECTION
+// ============================================================
+function checkTileCollisions() {
+  if (player.hitFlash > 20) return; // brief grace after hit
+  for (const t of tiles) {
+    if (t.collected) continue;
+    if (overlaps(player.x, player.y, PW, PH, t.wx, t.wy, TW, TH)) {
+      collectTile(t);
+      break;
+    }
+  }
+}
+
+function collectTile(t) {
+  if (t.isDistractor) {
+    onHitPlayer();
+    return;
+  }
+  if (t.seqIdx === nextLetterIdx) {
+    // Letra correta na ordem certa
+    t.collected = true;
+    nextLetterIdx++;
+    playCorrect();
+    if (nextLetterIdx >= targetWord.length) {
+      onWordComplete();
+    }
+  } else if (t.char !== targetWord[nextLetterIdx]) {
+    // Letra errada
+    onHitPlayer();
+  }
+  // Mesma letra mas ocorrência futura (ex: 2º A de JANELA) → ignora sem punir
+}
+
+function onHitPlayer() {
+  playWrong();
+  lives--;
+  livesLost++;
+  wrongThisWord++;
+  flashScreen = 18;
+  player.hitFlash = 50;
+  // Adaptive: after 2 wrong, activate hint
+  if (wrongThisWord >= 2) hintActive = true;
+
+  if (lives <= 0) {
+    lives = 3;
+    // Reset uncollected correct tiles (allow retry)
+    tiles.forEach(t => { if (!t.isDistractor && !t.collected) {} }); // tiles stay
+    // Reset the whole word
+    tiles.forEach(t => t.collected = false);
+    nextLetterIdx = 0;
+    hintActive = true;
+    phaseTimer = 0;
+    flashScreen = 30;
+    respawnPlayer();
+  }
+}
+
+function onWordComplete() {
+  const pts = livesLost === 0 ? 15 : livesLost <= 1 ? 10 : 5;
+  score += pts;
+  wordsCompleted++;
+  gamePhase = 'wordComplete';
+  phaseTimer = 100; // ~1.7s at 60fps
+  playWin();
+  if (cfg.showWord === false) speakWord(targetWord);
+}
+
+// ============================================================
+// DRAWING
+// ============================================================
+function drawBg() {
+  // Sky gradient
+  const sky = ctx.createLinearGradient(0,0,0,CH);
+  sky.addColorStop(0, '#87CEEB');
+  sky.addColorStop(1, '#D0EEFF');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, CW, CH);
+
+  // Distant hills
+  ctx.fillStyle = 'rgba(130,190,100,0.35)';
+  ctx.beginPath();
+  ctx.ellipse(160 - cam.x*0.2, GND_Y+10, 180, 70, 0, Math.PI, 0);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(480 - cam.x*0.2, GND_Y+10, 220, 80, 0, Math.PI, 0);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(760 - cam.x*0.2, GND_Y+10, 160, 60, 0, Math.PI, 0);
+  ctx.fill();
+}
+
+function drawPlatforms() {
+  for (const p of platforms) {
+    const px = p.x - cam.x;
+    if (px + p.w < 0 || px > CW) continue;
+
+    if (p.isGround) {
+      // Green top
+      ctx.fillStyle = '#5A8F2B';
+      ctx.fillRect(px, p.y, p.w, 10);
+      // Brown dirt
+      ctx.fillStyle = '#8B6230';
+      ctx.fillRect(px, p.y+10, p.w, p.h);
+      // Darker grass edge
+      ctx.fillStyle = '#3D6B1A';
+      ctx.fillRect(px, p.y, p.w, 3);
+    } else {
+      // Platform: green top with brown edge
+      ctx.fillStyle = '#6AAD3C';
+      rndRect(ctx, px, p.y, p.w, p.h, 4); ctx.fill();
+      ctx.fillStyle = '#4A8A1C';
+      ctx.fillRect(px, p.y + p.h - 4, p.w, 4);
+      ctx.fillStyle = '#3D6B18';
+      ctx.fillRect(px, p.y, p.w, 3);
+    }
+  }
+}
+
+function drawTiles() {
+  const now = Date.now();
+  for (const t of tiles) {
+    if (t.collected) continue;
+    const tx = t.wx - cam.x;
+    const ty = t.wy;
+    if (tx + TW < 0 || tx > CW) continue;
+
+    const isHint = !t.isDistractor && t.seqIdx === nextLetterIdx && (cfg.hint || hintActive);
+
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    rndRect(ctx, tx+3, ty+3, TW, TH, 9); ctx.fill();
+
+    // Tile
+    ctx.fillStyle = isHint ? '#FFD700' : '#FF8C42';
+    rndRect(ctx, tx, ty, TW, TH, 9); ctx.fill();
+
+    // Top sheen
+    ctx.fillStyle = isHint ? 'rgba(255,255,200,0.35)' : 'rgba(255,255,255,0.22)';
+    rndRect(ctx, tx+3, ty+3, TW-6, TH/2-2, 6); ctx.fill();
+
+    // Glow pulse for hint
+    if (isHint) {
+      const alpha = 0.45 + 0.45*Math.sin(now/180);
+      ctx.strokeStyle = `rgba(255,210,0,${alpha})`;
+      ctx.lineWidth = 3.5;
+      rndRect(ctx, tx-3, ty-3, TW+6, TH+6, 11); ctx.stroke();
+    }
+
+    // Letter
+    ctx.fillStyle = isHint ? '#7B4500' : 'white';
+    ctx.font = 'bold 18px Nunito, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(t.char, tx + TW/2, ty + TH/2 + 1);
+  }
+}
+
+function getAnimState() {
+  if (player.hitFlash > 25)    return 'hurt';
+  if (!player.onGround)        return 'jump';
+  const spd = Math.abs(player.vx);
+  if (spd < 0.5)               return 'idle';
+  if (spd < 2.8)               return 'walk';
+  return 'run';
+}
+
+function drawPlayer() {
+  // Invincibility blink after hurt
+  if (player.hitFlash > 0 && player.hitFlash <= 25 && Math.floor(player.hitFlash/4)%2===1) return;
+
+  const animKey = getAnimState();
+  const sd  = SPRITE_DATA[animKey];
+  const img = sprites[animKey];
+
+  // Scale sprite proportionally to player hitbox height
+  const SH = Math.round(PH * 2.2);
+  const SW = Math.round(sd.fw / sd.fh * SH);
+
+  const px = Math.round(player.x - cam.x);
+  const py = Math.round(player.y);
+
+  // Center horizontally on hitbox; align sprite feet to ground
+  const sx = px + Math.round(PW / 2 - SW / 2);
+  const sy = py + PH - SH + 14;
+
+  if (!img) {
+    // Fallback rectangle if sprites not loaded yet
+    ctx.fillStyle = '#1565C0';
+    ctx.fillRect(px, py, PW, PH);
+    return;
+  }
+
+  const frame = animKey === 'idle' ? 0 : Math.floor(player.anim / sd.speed) % sd.frames;
+
+  ctx.save();
+  if (player.facing < 0) {
+    ctx.translate(sx + SW, sy);
+    ctx.scale(-1, 1);
+    ctx.drawImage(img, frame * sd.fw, 0, sd.fw, sd.fh, 0, 0, SW, SH);
+  } else {
+    ctx.drawImage(img, frame * sd.fw, 0, sd.fw, sd.fh, sx, sy, SW, SH);
+  }
+  ctx.restore();
+}
+
+function drawHUD() {
+  // Background
+  ctx.fillStyle = 'rgba(30,100,145,0.92)';
+  ctx.fillRect(0, 0, CW, HUD_H);
+
+  // Word progress — center
+  let display;
+  if (!cfg.showWord && nextLetterIdx === 0) {
+    display = '? '.repeat(targetWord.length).trim();
+  } else {
+    display = [...targetWord].map((c,i) => i < nextLetterIdx ? c : (cfg.showWord ? '_' : '?')).join(' ');
+  }
+  ctx.fillStyle = 'white';
+  ctx.font = 'bold 28px Nunito, monospace';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(display, CW/2, HUD_H/2);
+
+  // Emoji (left of word)
+  ctx.font = '24px serif';
+  ctx.textAlign = 'right';
+  ctx.fillText(wordEmoji, CW/2 - (targetWord.length*20)/2 - 18, HUD_H/2 + 1);
+
+  // Lives (left side)
+  for (let i=0; i<3; i++) {
+    ctx.fillStyle = i < lives ? '#F44336' : '#555';
+    ctx.beginPath(); ctx.arc(18 + i*22, HUD_H/2, 7, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = i < lives ? '#FF6B6B' : '#666';
+    ctx.beginPath(); ctx.arc(16 + i*22, HUD_H/2-2, 3, 0, Math.PI*2); ctx.fill();
+  }
+
+  // Score (right side)
+  ctx.fillStyle = '#FFD700';
+  ctx.font = 'bold 15px Nunito, sans-serif';
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ctx.fillText(`⭐ ${score}`, CW - 10, HUD_H/2);
+
+  // Question progress (small, below score)
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.font = '12px Nunito, sans-serif';
+  ctx.fillText(`${qIdx+1}/${questionPool.length}`, CW - 10, HUD_H/2 + 12);
+}
+
+function drawFlash() {
+  if (flashScreen > 0) {
+    ctx.fillStyle = `rgba(244,67,54,${flashScreen/30 * 0.45})`;
+    ctx.fillRect(0, 0, CW, CH);
+    flashScreen--;
+  }
+}
+
+function drawWordComplete() {
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.fillRect(0, 0, CW, CH);
+  ctx.fillStyle = '#4CAF50';
+  ctx.font = 'bold 40px Nunito, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('✓ ' + targetWord + '!', CW/2, CH/2 - 10);
+  ctx.fillStyle = 'white';
+  ctx.font = 'bold 20px Nunito, sans-serif';
+  ctx.fillText(`+${livesLost===0?15:livesLost<=1?10:5} pontos`, CW/2, CH/2 + 32);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, CW, CH);
+  drawBg();
+  drawPlatforms();
+  drawTiles();
+  drawPlayer();
+  drawFlash();
+  drawHUD();
+  if (gamePhase === 'wordComplete') drawWordComplete();
+}
+
+// ============================================================
+// GAME LOOP
+// ============================================================
+let lastTs = 0;
+const STEP = 1000/60;
+
+function gameLoop(ts) {
+  rafId = requestAnimationFrame(gameLoop);
+  if (ts - lastTs < STEP - 2) return;
+  lastTs = ts;
+
+  if (gamePhase === 'playing') {
+    updatePhysics();
+    checkTileCollisions();
+  } else if (gamePhase === 'wordComplete') {
+    phaseTimer--;
+    if (phaseTimer <= 0) advanceWord();
+  }
+  draw();
+}
+
+function advanceWord() {
+  qIdx++;
+  if (qIdx >= questionPool.length) {
+    showVictory();
+  } else {
+    buildLevel();
+    if (!cfg.showWord) {
+      setTimeout(()=>speakWord(targetWord), 300);
+    }
+  }
+}
+
+// ============================================================
+// INPUT
+// ============================================================
+function setupInput() {
+  document.addEventListener('keydown', e => {
+    keys[e.key] = true;
+    if ([' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+  });
+  document.addEventListener('keyup', e => { keys[e.key] = false; });
+
+  function mBtn(id, prop) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const on  = e => { e.preventDefault(); mobileKeys[prop] = true; };
+    const off = e => { e.preventDefault(); mobileKeys[prop] = false; };
+    el.addEventListener('touchstart',  on,  {passive:false});
+    el.addEventListener('touchend',    off, {passive:false});
+    el.addEventListener('touchcancel', off, {passive:false});
+    el.addEventListener('mousedown', on);
+    el.addEventListener('mouseup',   off);
+  }
+  mBtn('btnLeft',  'left');
+  mBtn('btnRight', 'right');
+  mBtn('btnJump',  'jump');
+}
+
+// ============================================================
+// SCREENS & FLOW
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startGame(key) {
+  levelKey = key;
+  cfg = DIFF_CFG[key];
+  showScreen('screenTuto');
+}
+
+let resizeTimer;
+function setupCanvas() {
+  if (!canvas) return;
+  const dpr  = window.devicePixelRatio || 1;
+  const wrap = canvas.parentElement;
+  const W    = wrap.clientWidth;
+  const H    = wrap.clientHeight;
+  canvas.width  = Math.round(W * dpr);
+  canvas.height = Math.round(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  CW    = W;
+  CH    = H;
+  GND_Y = CH - 44;
+}
+
+function beginGame() {
+  score = 0; wordsCompleted = 0; qIdx = 0;
+  questionPool = shuffle([...WORDS[levelKey]]).slice(0, cfg.questions);
+  showScreen('screenGame');
+
+  if (!canvas) {
+    canvas = document.getElementById('gameCanvas');
+    ctx    = canvas.getContext('2d');
+    setupInput();
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => { setupCanvas(); if (gamePhase === 'playing') buildLevel(); }, 120);
+    });
+  }
+
+  setupCanvas();
+
+  document.getElementById('btnReplay').style.display = (levelKey === 'dificil') ? '' : 'none';
+
+  preloadSprites().then(() => {
+    buildLevel();
+    if (!cfg.showWord) setTimeout(()=>speakWord(targetWord), 500);
+    if (rafId) cancelAnimationFrame(rafId);
+    lastTs = 0;
+    rafId = requestAnimationFrame(gameLoop);
+  });
+}
+
+function replayWord() { speakWord(targetWord); }
+
+function goBack() {
+  if (rafId) cancelAnimationFrame(rafId);
+  showScreen('screenDiff');
+}
+
+function showVictory() {
+  if (rafId) cancelAnimationFrame(rafId);
+  const pct = wordsCompleted / questionPool.length;
+  let stars, emoji, title, msg;
+  if (pct >= 0.8) { stars='⭐⭐⭐'; emoji='🏆'; title='Mestre das Letras!'; msg='Você dominou o labirinto!'; }
+  else if (pct >= 0.5) { stars='⭐⭐'; emoji='🎉'; title='Muito Bem!'; msg='Continue explorando!'; }
+  else { stars='⭐'; emoji='💪'; title='Bom Esforço!'; msg='Pratique mais e vai dominar!'; }
+  document.getElementById('vicEmoji').textContent  = emoji;
+  document.getElementById('vicTitle').textContent  = title;
+  document.getElementById('vicMsg').textContent    = msg;
+  document.getElementById('vicStars').textContent  = stars;
+  document.getElementById('statWords').textContent = wordsCompleted;
+  document.getElementById('statScore').textContent = score;
+  showScreen('screenVic');
+}
+</script>
+<script>window.nipoConfig = { wrapCorrect: false, wrapWrong: false };</script>
+<script src="../nipo.js"></script>
+<script>
+  (function () {
+    var _origOnWordComplete = window.onWordComplete;
+    window.onWordComplete = function () {
+      if (window.nipoCorrect) window.nipoCorrect();
+      return _origOnWordComplete && _origOnWordComplete.apply(this, arguments);
+    };
+  })();
+</script>
+</body>
+</html>

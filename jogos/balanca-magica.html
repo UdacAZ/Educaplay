@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laboratório Mágico | EducaPlay</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --lab-dark:       #050F1A;
+      --lab-green:      #00E676;
+      --lab-green-d:    #00C853;
+      --lab-green-dim:  rgba(0,230,118,0.12);
+      --lab-purple:     #CE93D8;
+      --lab-purple-d:   #9C27B0;
+      --lab-blue:       #40C4FF;
+      --lab-amber:      #FFD740;
+      --lab-red:        #FF5252;
+      --lab-panel:      rgba(5,20,35,0.90);
+      --lab-card:       rgba(8,25,45,0.95);
+      --lab-border:     rgba(0,230,118,0.30);
+      --lab-border-hi:  rgba(0,230,118,0.55);
+      --success:        #00E676;
+      --error:          #FF5252;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      color: #E0F2F1;
+      min-height: 100vh;
+      background:
+        linear-gradient(rgba(2,8,15,0.70), rgba(2,8,15,0.70)),
+        url('../imag/fundo_balanca.png') center/cover fixed;
+    }
+
+    .screen { display: none; min-height: 100vh; }
+    .screen.active { display: flex; flex-direction: column; }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      background: rgba(3,12,22,0.95);
+      backdrop-filter: blur(12px);
+      padding: 14px 24px;
+      display: flex; align-items: center; gap: 16px;
+      border-bottom: 1px solid var(--lab-border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 1.3rem; font-weight: 900; color: #E0F2F1; text-decoration: none;
+    }
+    .logo-highlight { color: var(--lab-green); }
+    .back-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px;
+      background: var(--lab-green-dim);
+      border: 1px solid var(--lab-border);
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.875rem;
+      color: var(--lab-green); cursor: pointer; transition: all 0.2s;
+    }
+    .back-btn:hover { background: rgba(0,230,118,0.22); border-color: var(--lab-green-d); }
+
+    /* ════════════════════════
+       DIFFICULTY SCREEN
+    ════════════════════════ */
+    .diff-hero {
+      background: linear-gradient(135deg, rgba(5,20,35,0.97), rgba(8,30,50,0.97));
+      border-bottom: 1px solid var(--lab-border);
+      padding: 50px 24px 58px; text-align: center; color: #E0F2F1;
+      position: relative; overflow: hidden;
+    }
+    .diff-hero::before {
+      content: '';
+      position: absolute; width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(0,230,118,0.07) 0%, transparent 70%);
+      border-radius: 50%; top: -150px; right: -80px;
+    }
+    .diff-hero::after {
+      content: '';
+      position: absolute; width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(156,39,176,0.09) 0%, transparent 70%);
+      border-radius: 50%; bottom: -80px; left: -50px;
+    }
+    .diff-hero-icon {
+      font-size: 5rem; margin-bottom: 12px;
+      filter: drop-shadow(0 0 24px rgba(0,230,118,0.5));
+    }
+    .diff-hero h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.6rem; margin-bottom: 8px;
+      color: var(--lab-green);
+      text-shadow: 0 0 30px rgba(0,230,118,0.45);
+    }
+    .diff-hero p { font-size: 1rem; opacity: 0.82; max-width: 480px; margin: 0 auto 22px; }
+    .how-badge {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: rgba(0,230,118,0.08); border: 1px solid var(--lab-border);
+      padding: 10px 22px; border-radius: 50px;
+      font-size: 0.9rem; font-weight: 700; color: var(--lab-green);
+    }
+
+    .diff-cards {
+      display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;
+      padding: 40px 24px; max-width: 900px; margin: 0 auto;
+    }
+    .diff-card {
+      background: var(--lab-card); backdrop-filter: blur(12px);
+      border-radius: 20px; padding: 32px 28px; width: 240px; text-align: center;
+      border: 2px solid rgba(0,230,118,0.25);
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+      position: relative; cursor: pointer;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+    }
+    .diff-card:hover { transform: translateY(-8px); }
+    .diff-card.facil:hover   { border-color: var(--lab-green);  box-shadow: 0 8px 40px rgba(0,230,118,0.25); }
+    .diff-card.medio:hover   { border-color: var(--lab-blue);   box-shadow: 0 8px 40px rgba(64,196,255,0.25); }
+    .diff-card.dificil:hover { border-color: var(--lab-purple); box-shadow: 0 8px 40px rgba(206,147,216,0.25); }
+
+    .diff-badge {
+      position: absolute; top: -1px; right: 20px;
+      padding: 4px 16px; border-radius: 0 0 12px 12px;
+      font-size: 0.75rem; font-weight: 800; color: #050F1A;
+    }
+    .facil   .diff-badge { background: var(--lab-green); }
+    .medio   .diff-badge { background: var(--lab-blue); }
+    .dificil .diff-badge { background: var(--lab-purple); }
+
+    .diff-icon { font-size: 3.5rem; margin-bottom: 12px; }
+    .diff-card h3 { font-size: 1.3rem; font-weight: 900; margin-bottom: 6px; color: #E0F2F1; }
+    .diff-card .desc { font-size: 0.875rem; color: #80CBC4; margin-bottom: 16px; min-height: 44px; }
+    .diff-meta { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .diff-meta span {
+      padding: 4px 10px; border-radius: 50px; font-size: 0.76rem; font-weight: 700;
+    }
+    .facil   .diff-meta span { background: rgba(0,230,118,0.08);  border: 1px solid rgba(0,230,118,0.2);  color: var(--lab-green); }
+    .medio   .diff-meta span { background: rgba(64,196,255,0.08); border: 1px solid rgba(64,196,255,0.2); color: var(--lab-blue); }
+    .dificil .diff-meta span { background: rgba(206,147,216,0.08);border: 1px solid rgba(206,147,216,0.2);color: var(--lab-purple); }
+
+    .btn-play {
+      width: 100%; padding: 12px; border: none; border-radius: 50px;
+      font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .facil   .btn-play { background: var(--lab-green);  color: #050F1A; }
+    .facil   .btn-play:hover { background: var(--lab-green-d); transform: scale(1.02); box-shadow: 0 0 20px rgba(0,230,118,0.4); }
+    .medio   .btn-play { background: var(--lab-blue);   color: #050F1A; }
+    .medio   .btn-play:hover { background: #00B0FF; transform: scale(1.02); box-shadow: 0 0 20px rgba(64,196,255,0.4); }
+    .dificil .btn-play { background: var(--lab-purple); color: #050F1A; }
+    .dificil .btn-play:hover { background: var(--lab-purple-d); transform: scale(1.02); box-shadow: 0 0 20px rgba(206,147,216,0.4); }
+
+    /* ════════════════════════
+       GAME SCREEN
+    ════════════════════════ */
+    .game-header {
+      background: rgba(3,12,22,0.95); backdrop-filter: blur(12px);
+      padding: 14px 20px; display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid var(--lab-border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .game-level-name {
+      flex: 1; text-align: center;
+      font-family: 'Fredoka One', cursive; font-size: 1.1rem;
+      color: var(--lab-green); text-shadow: 0 0 10px rgba(0,230,118,0.35);
+    }
+    .stat-pill {
+      display: flex; align-items: center; gap: 5px;
+      background: var(--lab-green-dim); border: 1px solid var(--lab-border);
+      padding: 7px 14px; border-radius: 50px;
+      font-size: 0.88rem; font-weight: 800; color: var(--lab-green); white-space: nowrap;
+    }
+
+    .question-progress {
+      display: flex; align-items: center; gap: 12px; padding: 14px 24px 6px;
+    }
+    .q-progress-track {
+      flex: 1; height: 8px; background: rgba(0,230,118,0.08);
+      border-radius: 4px; overflow: hidden; border: 1px solid rgba(0,230,118,0.12);
+    }
+    .q-progress-fill {
+      height: 100%;
+      background: linear-gradient(to right, var(--lab-green-d), var(--lab-green));
+      border-radius: 4px; transition: width 0.4s ease;
+      box-shadow: 0 0 10px rgba(0,230,118,0.45);
+    }
+    .q-progress-text { font-size: 0.82rem; font-weight: 700; color: var(--lab-green); white-space: nowrap; opacity: 0.75; }
+
+    /* ── LAB SCALE / BANCADA ── */
+    .scale-section {
+      display: flex; justify-content: center; align-items: center;
+      padding: 10px 24px 0;
+    }
+    .scale-stage { position: relative; width: 480px; height: 280px; flex-shrink: 0; }
+
+    /* Lab stand */
+    .scale-post {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      bottom: 0; width: 12px; height: 200px;
+      background: linear-gradient(to right, #1A2035, #4A5070, #1A2035);
+      border-radius: 6px 6px 3px 3px; z-index: 1;
+      box-shadow: 0 0 16px rgba(0,230,118,0.12);
+    }
+    .scale-ball {
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      width: 24px; height: 24px;
+      background: radial-gradient(circle at 35% 35%, #80CBC4, #00796B);
+      border-radius: 50%;
+      box-shadow: 0 0 16px rgba(0,230,118,0.7), 0 0 6px rgba(0,230,118,0.4);
+    }
+    .scale-base {
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 90px; height: 14px;
+      background: linear-gradient(to right, #1A2035, #3A4060, #1A2035);
+      border-radius: 7px;
+      box-shadow: 0 0 18px rgba(0,230,118,0.14);
+    }
+
+    /* Crossbar */
+    .scale-beam {
+      position: absolute; top: 62px; left: 40px;
+      width: 400px; height: 14px;
+      transform-origin: 200px 7px;
+      transition: transform 0.65s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 2;
+    }
+    .scale-beam-bar {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, #3A4060, #1A2035, #3A4060);
+      border-radius: 7px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,230,118,0.06);
+    }
+    .scale-beam::after {
+      content: '';
+      position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+      width: 32px; height: 32px;
+      background: radial-gradient(circle at 35% 35%, #80CBC4, #004D40);
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(0,230,118,0.8), 0 0 8px rgba(0,230,118,0.4);
+    }
+
+    .scale-beam.tilt-left  { transform: rotate(-16deg); }
+    .scale-beam.balanced   { transform: rotate(0deg); }
+    .scale-beam.tilt-right { transform: rotate(16deg); }
+
+    /* Flask assemblies */
+    .pan-assembly {
+      position: absolute; top: 14px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .pan-assembly.left  { left: -12px; transform: translateX(-50%); }
+    .pan-assembly.right { right: -12px; transform: translateX(50%); }
+
+    .pan-string {
+      width: 2px; height: 55px;
+      background: linear-gradient(to bottom, #4A5070, #2A3050);
+    }
+
+    .scale-pan {
+      width: 148px; min-height: 90px;
+      border-radius: 16px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 10px 14px;
+      transition: all 0.4s ease;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+
+    /* Bubble particles inside flasks */
+    .scale-pan::before {
+      content: '';
+      position: absolute; bottom: 0; left: 22%;
+      width: 10px; height: 10px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      animation: labBubble 2.2s ease-in-out infinite;
+    }
+    .scale-pan::after {
+      content: '';
+      position: absolute; bottom: 0; right: 22%;
+      width: 7px; height: 7px;
+      background: rgba(255,255,255,0.10);
+      border-radius: 50%;
+      animation: labBubble 1.7s ease-in-out infinite 0.7s;
+    }
+    @keyframes labBubble {
+      0%,100% { transform: translateY(0); opacity: 0; }
+      25%     { opacity: 0.9; }
+      85%     { transform: translateY(-42px); opacity: 0; }
+    }
+
+    /* Counter-rotate pans to stay upright */
+    .scale-beam.tilt-left  .scale-pan { transform: rotate(16deg); }
+    .scale-beam.balanced   .scale-pan { transform: rotate(0deg); }
+    .scale-beam.tilt-right .scale-pan { transform: rotate(-16deg); }
+
+    /* Formula flask — teal/green */
+    .pan-left {
+      background: linear-gradient(145deg, rgba(0,60,50,0.92), rgba(0,105,92,0.88));
+      border: 2px solid rgba(0,230,118,0.40);
+      color: #E0F7FA;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.5), inset 0 0 22px rgba(0,230,118,0.06);
+    }
+    /* Target potion flask — purple */
+    .pan-right {
+      background: linear-gradient(145deg, rgba(45,20,110,0.92), rgba(72,40,150,0.88));
+      border: 2px solid rgba(206,147,216,0.40);
+      color: #EDE7F6;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.5), inset 0 0 22px rgba(156,39,176,0.07);
+    }
+
+    .pan-label {
+      font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.5px; opacity: 0.72; margin-bottom: 4px;
+    }
+    .pan-equation { font-size: 1.5rem; font-weight: 900; line-height: 1.2; }
+    .pan-answer-slot {
+      display: inline-block; min-width: 36px;
+      border-bottom: 3px solid rgba(0,230,118,0.7);
+      font-size: 1.5rem; font-weight: 900; color: var(--lab-green);
+      text-align: center; padding: 0 4px;
+    }
+    .pan-result {
+      font-family: 'Fredoka One', cursive; font-size: 2.4rem;
+      color: var(--lab-purple);
+      text-shadow: 0 0 14px rgba(206,147,216,0.55);
+    }
+
+    /* Glow states */
+    .scale-pan.correct-glow {
+      box-shadow: 0 0 0 3px var(--lab-green), 0 8px 32px rgba(0,230,118,0.55) !important;
+    }
+    .scale-pan.wrong-glow {
+      box-shadow: 0 0 0 3px var(--lab-red), 0 8px 32px rgba(255,82,82,0.45) !important;
+    }
+
+    /* Balanced success — both flasks glow green */
+    .scale-beam.balanced.success .pan-left,
+    .scale-beam.balanced.success .pan-right {
+      background: linear-gradient(145deg, rgba(0,90,55,0.92), rgba(0,160,90,0.88));
+      border-color: rgba(0,230,118,0.7);
+    }
+
+    /* ── FEEDBACK ── */
+    .feedback-section { display: flex; justify-content: center; padding: 10px 24px 4px; min-height: 52px; }
+    .feedback-pill {
+      padding: 10px 24px; border-radius: 50px;
+      font-size: 0.95rem; font-weight: 800;
+      opacity: 0; transform: translateY(-6px); transition: all 0.3s; text-align: center;
+    }
+    .feedback-pill.show { opacity: 1; transform: translateY(0); }
+    .feedback-pill.correct { background: rgba(0,230,118,0.12); color: var(--lab-green); border: 1px solid rgba(0,230,118,0.35); }
+    .feedback-pill.high    { background: rgba(255,82,82,0.10);  color: #FF8A80;          border: 1px solid rgba(255,82,82,0.28); }
+    .feedback-pill.low     { background: rgba(255,215,64,0.10); color: var(--lab-amber); border: 1px solid rgba(255,215,64,0.28); }
+
+    /* ── HINT BAR ── */
+    .hint-bar {
+      background: rgba(255,215,64,0.07); border: 1px solid rgba(255,215,64,0.28);
+      border-radius: 12px; padding: 7px 16px; margin: 4px 20px;
+      font-size: 0.83rem; font-weight: 700; color: var(--lab-amber);
+      text-align: center; display: none;
+      animation: hintIn 0.3s ease;
+    }
+    .hint-bar.show { display: block; }
+    @keyframes hintIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ── ATTEMPTS ── */
+    .attempts-row { display: flex; justify-content: center; gap: 10px; padding: 4px 24px 2px; }
+    .attempt-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: rgba(0,230,118,0.15); border: 1px solid rgba(0,230,118,0.25);
+      transition: background 0.3s;
+    }
+    .attempt-dot.used { background: var(--lab-red); border-color: var(--lab-red); box-shadow: 0 0 8px rgba(255,82,82,0.5); }
+
+    /* ── NUMBER PAD ── */
+    .input-section {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 8px 24px 24px; gap: 12px;
+    }
+    .answer-display {
+      background: rgba(5,20,35,0.92); border: 2px solid rgba(0,230,118,0.32);
+      border-radius: 16px; padding: 14px 32px;
+      font-family: 'Fredoka One', cursive; font-size: 2.2rem;
+      color: var(--lab-green); min-width: 160px; text-align: center;
+      box-shadow: 0 0 22px rgba(0,230,118,0.08), inset 0 0 30px rgba(0,0,0,0.3);
+      transition: border-color 0.2s, box-shadow 0.2s; letter-spacing: 2px;
+    }
+    .answer-display.correct { border-color: var(--lab-green); box-shadow: 0 0 28px rgba(0,230,118,0.30); color: var(--lab-green); }
+    .answer-display.wrong   { border-color: var(--lab-red);   box-shadow: 0 0 28px rgba(255,82,82,0.30); color: var(--lab-red); }
+    .answer-placeholder { color: rgba(0,230,118,0.28); }
+
+    .numpad { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; width: 240px; }
+    .numpad-btn {
+      padding: 16px;
+      border: 1px solid var(--lab-border); border-radius: 14px;
+      background: rgba(0,230,118,0.05);
+      font-family: 'Nunito', sans-serif; font-size: 1.25rem; font-weight: 800;
+      color: #B2EBF2; cursor: pointer; transition: all 0.15s;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+    }
+    .numpad-btn:hover  { background: rgba(0,230,118,0.16); border-color: var(--lab-green); color: var(--lab-green); transform: translateY(-2px); box-shadow: 0 0 14px rgba(0,230,118,0.2); }
+    .numpad-btn:active { transform: translateY(0); box-shadow: none; }
+    .numpad-btn.delete { background: rgba(255,82,82,0.07); border-color: rgba(255,82,82,0.28); color: var(--lab-red); }
+    .numpad-btn.delete:hover { background: rgba(255,82,82,0.18); border-color: var(--lab-red); }
+    .numpad-btn.confirm { background: var(--lab-green); border-color: var(--lab-green); color: #050F1A; font-size: 1.4rem; font-weight: 900; }
+    .numpad-btn.confirm:hover { background: var(--lab-green-d); box-shadow: 0 0 22px rgba(0,230,118,0.45); }
+    .numpad-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+    /* ════════════════════════
+       VICTORY SCREEN
+    ════════════════════════ */
+    #screen-victory {
+      align-items: center; justify-content: center;
+      padding: 40px 24px; position: relative; overflow: hidden;
+    }
+    #screen-victory::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, rgba(0,100,60,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .victory-card {
+      background: rgba(5,20,35,0.96); backdrop-filter: blur(20px);
+      border: 2px solid var(--lab-border); border-radius: 24px;
+      padding: 40px 36px; max-width: 520px; width: 100%; text-align: center;
+      box-shadow: 0 20px 80px rgba(0,0,0,0.65), 0 0 60px rgba(0,230,118,0.07);
+      position: relative; z-index: 1;
+    }
+    .victory-card::before {
+      content: '⚗️ EXPERIMENTO CONCLUÍDO ⚗️';
+      position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+      background: var(--lab-green); color: #050F1A;
+      font-family: 'Fredoka One', cursive; font-size: 13px;
+      padding: 5px 22px; border-radius: 20px; white-space: nowrap;
+    }
+    .victory-emoji { font-size: 4rem; margin-bottom: 8px; margin-top: 10px; display: block; }
+    .victory-title {
+      font-family: 'Fredoka One', cursive; font-size: 2.2rem;
+      color: var(--lab-green); margin-bottom: 4px;
+      text-shadow: 0 0 22px rgba(0,230,118,0.45);
+    }
+    .victory-sub { color: #80CBC4; margin-bottom: 24px; }
+
+    .stars-row { display: flex; justify-content: center; gap: 8px; margin-bottom: 24px; }
+    .star {
+      font-size: 3rem;
+      filter: grayscale(1) opacity(0.3); transform: scale(0.7);
+      transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .star.earned { filter: grayscale(0) opacity(1); transform: scale(1); }
+
+    .v-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+    .v-stat {
+      background: rgba(0,230,118,0.05); border: 1px solid var(--lab-border);
+      border-radius: 12px; padding: 16px 8px;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .v-stat .v-icon  { font-size: 1.5rem; }
+    .v-stat .v-val   { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: var(--lab-green); }
+    .v-stat .v-label { font-size: 0.72rem; color: #80CBC4; font-weight: 700; }
+
+    .wrong-review {
+      background: rgba(255,215,64,0.04); border: 1px solid rgba(255,215,64,0.20);
+      border-radius: 14px; padding: 14px 20px; margin-bottom: 20px; text-align: left;
+    }
+    .wrong-review h4 { font-size: 0.85rem; font-weight: 800; color: var(--lab-amber); margin-bottom: 10px; }
+    .review-item {
+      display: flex; align-items: center; gap: 10px; padding: 6px 0;
+      border-bottom: 1px solid rgba(255,215,64,0.12); font-size: 0.88rem;
+    }
+    .review-item:last-child { border-bottom: none; }
+    .review-eq { font-weight: 800; color: #B2EBF2; flex: 1; }
+    .review-correct { color: var(--lab-green); font-weight: 900; }
+
+    .star-msg {
+      background: rgba(0,230,118,0.05); border: 1px solid var(--lab-border);
+      border-radius: 12px; padding: 12px 20px; margin-bottom: 20px;
+      font-weight: 700; color: #80CBC4; font-size: 0.9rem;
+    }
+
+    .v-buttons { display: flex; flex-direction: column; gap: 10px; }
+    .v-btn {
+      padding: 14px; border-radius: 50px; border: 2px solid transparent;
+      font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .v-btn-primary { background: var(--lab-green); color: #050F1A; border-color: var(--lab-green); }
+    .v-btn-primary:hover { background: var(--lab-green-d); transform: translateY(-2px); box-shadow: 0 0 22px rgba(0,230,118,0.3); }
+    .v-btn-outline { background: transparent; color: var(--lab-green); border-color: rgba(0,230,118,0.38); }
+    .v-btn-outline:hover { background: rgba(0,230,118,0.10); }
+    .v-btn-ghost { background: transparent; color: #80CBC4; border-color: rgba(128,203,196,0.20); }
+    .v-btn-ghost:hover { color: #B2EBF2; border-color: rgba(128,203,196,0.40); }
+
+    /* CONFETTI */
+    .confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    .cp { position: absolute; top: -20px; border-radius: 2px; animation: cffall linear forwards; }
+    @keyframes cffall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-8px); }
+      80% { transform: translateX(8px); }
+    }
+    .shake { animation: shake 0.4s ease; }
+    .hidden { display: none !important; }
+
+    /* ── TUTORIAL SCREEN ── */
+    .tutorial-wrap {
+      max-width: 620px; margin: 0 auto;
+      padding: 28px 24px 40px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    .tutorial-head {
+      text-align: center; padding: 26px 20px;
+      background: rgba(5,20,35,0.94); backdrop-filter: blur(12px);
+      border: 1px solid var(--lab-border); border-radius: 20px; color: #E0F2F1;
+    }
+    .tutorial-head .t-icon { font-size: 3.2rem; margin-bottom: 10px; }
+    .tutorial-head h2 {
+      font-family: 'Fredoka One', cursive; font-size: 1.9rem;
+      color: var(--lab-green); margin-bottom: 4px;
+      text-shadow: 0 0 16px rgba(0,230,118,0.4);
+    }
+    .tutorial-head p { font-size: 0.9rem; color: #80CBC4; }
+
+    .steps-list { display: flex; flex-direction: column; gap: 12px; }
+    .t-step {
+      display: flex; align-items: flex-start; gap: 16px;
+      background: rgba(5,20,35,0.90); backdrop-filter: blur(12px);
+      border: 1px solid var(--lab-border); border-radius: 16px; padding: 16px 20px;
+    }
+    .t-step-num {
+      width: 36px; height: 36px; background: var(--lab-green); color: #050F1A;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 1rem; flex-shrink: 0;
+    }
+    .t-step-body { flex: 1; }
+    .t-step-body strong { display: block; font-size: 0.95rem; font-weight: 800; margin-bottom: 3px; color: #E0F2F1; }
+    .t-step-body span   { font-size: 0.875rem; color: #80CBC4; line-height: 1.5; }
+    .t-step-icon { font-size: 1.8rem; flex-shrink: 0; }
+
+    .tutorial-demo {
+      background: rgba(5,20,35,0.90); backdrop-filter: blur(12px);
+      border: 1px solid var(--lab-border); border-radius: 16px; padding: 20px;
+    }
+    .demo-title {
+      text-align: center; font-weight: 800; font-size: 0.85rem;
+      color: var(--lab-green); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16px;
+    }
+    .balance-demo {
+      display: flex; align-items: stretch; justify-content: center; flex-wrap: wrap; gap: 8px;
+    }
+    .bd-case { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; min-width: 120px; }
+    .bd-beam { font-size: 1.6rem; transition: transform 0.3s; }
+    .bd-beam.left  { display: inline-block; transform: rotate(-18deg); }
+    .bd-beam.right { display: inline-block; transform: rotate(18deg); }
+    .bd-label { font-size: 0.75rem; font-weight: 800; padding: 4px 12px; border-radius: 50px; white-space: nowrap; }
+    .bd-label.correct { background: rgba(0,230,118,0.12); color: var(--lab-green); border: 1px solid rgba(0,230,118,0.28); }
+    .bd-label.high    { background: rgba(255,82,82,0.10);  color: #FF8A80;          border: 1px solid rgba(255,82,82,0.28); }
+    .bd-label.low     { background: rgba(255,215,64,0.08); color: var(--lab-amber); border: 1px solid rgba(255,215,64,0.22); }
+    .bd-eq { font-size: 0.82rem; font-weight: 700; color: #80CBC4; text-align: center; }
+    .bd-divider { width: 1px; background: var(--lab-border); margin: 0 4px; }
+
+    .btn-start-game {
+      width: 100%; padding: 16px;
+      background: var(--lab-green); color: #050F1A;
+      border: none; border-radius: 50px;
+      font-family: 'Fredoka One', cursive; font-size: 1.2rem;
+      cursor: pointer; transition: all 0.25s;
+      box-shadow: 0 6px 26px rgba(0,230,118,0.38);
+    }
+    .btn-start-game:hover { background: var(--lab-green-d); transform: translateY(-3px); box-shadow: 0 10px 36px rgba(0,230,118,0.48); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .scale-stage { width: 340px; height: 220px; }
+      .scale-beam  { top: 45px; left: 20px; width: 300px; transform-origin: 150px 7px; }
+      .scale-post  { height: 150px; }
+      .pan-string  { height: 45px; }
+      .scale-pan   { width: 110px; min-height: 70px; }
+      .pan-equation { font-size: 1.2rem; }
+      .pan-result   { font-size: 1.6rem; }
+      .pan-answer-slot { font-size: 1.2rem; }
+      .numpad { width: 210px; gap: 8px; }
+      .numpad-btn { padding: 13px; font-size: 1.1rem; }
+      .answer-display { font-size: 1.6rem; padding: 12px 24px; }
+      .victory-card { padding: 32px 20px; }
+      .diff-card { width: 100%; max-width: 300px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════
+       SCREEN 1 — DIFFICULTY
+  ═══════════════════════════ -->
+  <div class="screen active" id="screen-difficulty">
+    <div class="top-bar">
+      <a href="../dashboard.html" class="logo">
+        <span>🧪</span>
+        <span>Educa<span class="logo-highlight">Play</span></span>
+      </a>
+    </div>
+
+    <div class="diff-hero">
+      <div class="diff-hero-icon">⚗️</div>
+      <h1>Laboratório Mágico</h1>
+      <p>Descubra o ingrediente secreto que completa a fórmula! A bancada mostra se a dose está alta ou baixa demais.</p>
+      <div class="how-badge">
+        <span>🧪 Fórmula</span><span>⚗️</span><span>🫧 Poção Alvo</span>
+      </div>
+    </div>
+
+    <div class="diff-cards">
+      <div class="diff-card facil" onclick="initGame('facil')">
+        <div class="diff-badge">FÁCIL</div>
+        <div class="diff-icon">🌿</div>
+        <h3>Poções Simples</h3>
+        <p class="desc">Ingredientes de 1 a 10, apenas com adição.</p>
+        <div class="diff-meta">
+          <span>➕ Adição</span><span>🔢 até 10</span><span>🧪 10 fórmulas</span>
+        </div>
+        <button class="btn-play">Misturar!</button>
+      </div>
+
+      <div class="diff-card medio" onclick="initGame('medio')">
+        <div class="diff-badge">MÉDIO</div>
+        <div class="diff-icon">🔥</div>
+        <h3>Poções Mistas</h3>
+        <p class="desc">Mistura de + e −, ingredientes até 20.</p>
+        <div class="diff-meta">
+          <span>➕➖ Misto</span><span>🔢 até 20</span><span>🧪 10 fórmulas</span>
+        </div>
+        <button class="btn-play">Misturar!</button>
+      </div>
+
+      <div class="diff-card dificil" onclick="initGame('dificil')">
+        <div class="diff-badge">DIFÍCIL</div>
+        <div class="diff-icon">💀</div>
+        <h3>Poções Explosivas</h3>
+        <p class="desc">Fórmulas avançadas com ingredientes até 50.</p>
+        <div class="diff-meta">
+          <span>➕➖ Misto</span><span>🔢 até 50</span><span>🧪 10 fórmulas</span>
+        </div>
+        <button class="btn-play">Misturar!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════
+       SCREEN 2 — TUTORIAL
+  ═══════════════════════════ -->
+  <div class="screen" id="screen-tutorial">
+    <div class="top-bar">
+      <button class="back-btn" onclick="goToDifficulty()">← Voltar</button>
+      <a href="../dashboard.html" class="logo" style="margin-left:auto">
+        <span>🧪</span><span>Educa<span class="logo-highlight">Play</span></span>
+      </a>
+    </div>
+
+    <div class="tutorial-wrap">
+      <div class="tutorial-head">
+        <div class="t-icon">⚗️</div>
+        <h2>Manual do Cientista</h2>
+        <p>Laboratório Mágico — leia antes de começar os experimentos!</p>
+      </div>
+
+      <div class="steps-list">
+        <div class="t-step">
+          <div class="t-step-num">1</div>
+          <div class="t-step-body">
+            <strong>Observe a bancada</strong>
+            <span>No frasco da <b>Fórmula</b> aparece uma equação com ingrediente faltando (<b>?</b>). No frasco da <b>Poção Alvo</b> aparece o resultado esperado.</span>
+          </div>
+          <div class="t-step-icon">⚗️</div>
+        </div>
+        <div class="t-step">
+          <div class="t-step-num">2</div>
+          <div class="t-step-body">
+            <strong>Digite a dose do ingrediente</strong>
+            <span>Use o painel numérico para digitar a quantidade certa do ingrediente secreto.</span>
+          </div>
+          <div class="t-step-icon">🧪</div>
+        </div>
+        <div class="t-step">
+          <div class="t-step-num">3</div>
+          <div class="t-step-body">
+            <strong>A bancada te guia!</strong>
+            <span>Se inclinar, a dose está <b>concentrada demais</b> ou <b>fraca demais</b>. Ajuste e tente de novo!</span>
+          </div>
+          <div class="t-step-icon">🔬</div>
+        </div>
+        <div class="t-step">
+          <div class="t-step-num">4</div>
+          <div class="t-step-body">
+            <strong>3 tentativas por fórmula</strong>
+            <span>Você tem 3 chances de acertar a dose. Acertar de primeira vale <b>3 pontos</b>!</span>
+          </div>
+          <div class="t-step-icon">🏆</div>
+        </div>
+      </div>
+
+      <div class="tutorial-demo">
+        <div class="demo-title">Veja como o experimento funciona</div>
+        <div class="balance-demo">
+          <div class="bd-case">
+            <div class="bd-beam left">⚗️</div>
+            <div class="bd-label high">🔬 Concentrado!</div>
+            <div class="bd-eq">7 + 12 ≠ 15<br>dose menor</div>
+          </div>
+          <div class="bd-divider"></div>
+          <div class="bd-case">
+            <div class="bd-beam">⚗️</div>
+            <div class="bd-label correct">✓ Poção Pronta!</div>
+            <div class="bd-eq">7 + 8 = 15<br>fórmula certa!</div>
+          </div>
+          <div class="bd-divider"></div>
+          <div class="bd-case">
+            <div class="bd-beam right">⚗️</div>
+            <div class="bd-label low">💧 Fraco!</div>
+            <div class="bd-eq">7 + 3 ≠ 15<br>dose maior</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-start-game" onclick="beginGame()">
+        🧪 Entendi! Iniciar Experimento →
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════
+       SCREEN 3 — GAME
+  ═══════════════════════════ -->
+  <div class="screen" id="screen-game">
+    <div class="game-header">
+      <button class="back-btn" onclick="goToDifficulty()">← Lab</button>
+      <div class="game-level-name" id="levelName">🧪 Fácil</div>
+      <div class="stat-pill">⏱ <span id="timerDisplay">0:00</span></div>
+      <div class="stat-pill">⭐ <span id="scoreDisplay">0</span></div>
+    </div>
+
+    <div class="question-progress">
+      <div class="q-progress-track">
+        <div class="q-progress-fill" id="qProgressFill" style="width:0%"></div>
+      </div>
+      <div class="q-progress-text" id="qProgressText">1 / 10</div>
+    </div>
+
+    <div class="hint-bar" id="hintBar"></div>
+
+    <!-- Bancada Científica -->
+    <div class="scale-section">
+      <div class="scale-stage">
+        <div class="scale-post">
+          <div class="scale-ball"></div>
+        </div>
+        <div class="scale-base"></div>
+
+        <div class="scale-beam balanced" id="scaleBeam">
+          <div class="scale-beam-bar"></div>
+
+          <!-- Frasco Fórmula (esquerda) -->
+          <div class="pan-assembly left">
+            <div class="pan-string"></div>
+            <div class="scale-pan pan-left" id="panLeft">
+              <div class="pan-label">🧪 Fórmula</div>
+              <div class="pan-equation" id="equationDisplay">
+                <span id="eqLeft">7 + </span><span class="pan-answer-slot" id="eqSlot">?</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Frasco Poção Alvo (direita) -->
+          <div class="pan-assembly right">
+            <div class="pan-string"></div>
+            <div class="scale-pan pan-right" id="panRight">
+              <div class="pan-label">🫧 Poção Alvo</div>
+              <div class="pan-result" id="resultDisplay">15</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feedback-section">
+      <div class="feedback-pill" id="feedbackPill"></div>
+    </div>
+
+    <div class="attempts-row" id="attemptsRow">
+      <div class="attempt-dot" id="dot0"></div>
+      <div class="attempt-dot" id="dot1"></div>
+      <div class="attempt-dot" id="dot2"></div>
+    </div>
+
+    <div class="input-section">
+      <div class="answer-display" id="answerDisplay">
+        <span class="answer-placeholder" id="displayText">—</span>
+      </div>
+
+      <div class="numpad">
+        <button class="numpad-btn" onclick="numInput('7')">7</button>
+        <button class="numpad-btn" onclick="numInput('8')">8</button>
+        <button class="numpad-btn" onclick="numInput('9')">9</button>
+        <button class="numpad-btn" onclick="numInput('4')">4</button>
+        <button class="numpad-btn" onclick="numInput('5')">5</button>
+        <button class="numpad-btn" onclick="numInput('6')">6</button>
+        <button class="numpad-btn" onclick="numInput('1')">1</button>
+        <button class="numpad-btn" onclick="numInput('2')">2</button>
+        <button class="numpad-btn" onclick="numInput('3')">3</button>
+        <button class="numpad-btn delete" onclick="numDelete()">⌫</button>
+        <button class="numpad-btn" onclick="numInput('0')">0</button>
+        <button class="numpad-btn confirm" id="confirmBtn" onclick="confirmAnswer()">✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════
+       SCREEN 4 — VICTORY
+  ═══════════════════════════ -->
+  <div class="screen" id="screen-victory">
+    <div class="confetti-wrap" id="confettiWrap"></div>
+
+    <div class="victory-card">
+      <span class="victory-emoji" id="vEmoji">🏆</span>
+      <div class="victory-title" id="vTitle">Cientista Mestre!</div>
+      <div class="victory-sub"   id="vSub">Você completou todas as fórmulas!</div>
+
+      <div class="stars-row">
+        <div class="star" id="star1">⭐</div>
+        <div class="star" id="star2">⭐</div>
+        <div class="star" id="star3">⭐</div>
+      </div>
+
+      <div class="v-stats">
+        <div class="v-stat">
+          <div class="v-icon">⭐</div>
+          <div class="v-val" id="vScore">—</div>
+          <div class="v-label">PONTOS</div>
+        </div>
+        <div class="v-stat">
+          <div class="v-icon">⏱</div>
+          <div class="v-val" id="vTime">—</div>
+          <div class="v-label">TEMPO</div>
+        </div>
+        <div class="v-stat">
+          <div class="v-icon">🎯</div>
+          <div class="v-val" id="vAccuracy">—</div>
+          <div class="v-label">1ª MISTURA</div>
+        </div>
+      </div>
+
+      <div class="wrong-review hidden" id="wrongReview">
+        <h4>📚 Revise estas fórmulas:</h4>
+        <div id="wrongList"></div>
+      </div>
+
+      <div class="star-msg" id="vStarMsg"></div>
+
+      <div class="v-buttons">
+        <button class="v-btn v-btn-primary" onclick="replayGame()">🔄 Novo Experimento</button>
+        <button class="v-btn v-btn-outline" onclick="goToDifficulty()">🧫 Mudar Dificuldade</button>
+        <a href="../dashboard.html" style="text-decoration:none">
+          <button class="v-btn v-btn-ghost" style="width:100%">🏠 Voltar ao Dashboard</button>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const adaptive = {
+      history: [], diffMod: 0, hintLevel: 0,
+      reset() { this.history = []; this.diffMod = 0; this.hintLevel = 0; },
+      record(correct, fast = false) {
+        const pts = correct ? (fast ? 2 : 1) : -1;
+        this.history.push(pts);
+        if (this.history.length > 5) this.history.shift();
+        if (this.history.length >= 3) this._evaluate();
+      },
+      _evaluate() {
+        const sum = this.history.reduce((a, b) => a + b, 0);
+        if (sum <= -3) {
+          this.diffMod   = Math.max(-2, this.diffMod - 1);
+          this.hintLevel = Math.min(2, this.hintLevel + 1);
+        } else if (sum >= 5) {
+          this.diffMod   = Math.min(2, this.diffMod + 1);
+          this.hintLevel = Math.max(0, this.hintLevel - 1);
+        } else if (sum >= 3 && this.hintLevel > 0) {
+          this.hintLevel = Math.max(0, this.hintLevel - 1);
+        }
+      }
+    };
+
+    let questions = [], qIndex = 0, attempts = 0, currentInput = '';
+    let score = 0, seconds = 0, timerInterval = null, isLocked = false;
+    let currentLevel = 'facil', wrongAnswers = [], firstAttemptCorrect = 0;
+    const MAX_ATTEMPTS = 3, TOTAL_Q = 10;
+
+    function generateQuestions(level) {
+      const qs = [], seen = new Set();
+      const dm = adaptive.diffMod;
+      while (qs.length < TOTAL_Q) {
+        let a, missing, b, op, key;
+        if (level === 'facil') {
+          const maxA = Math.max(2, 7  + dm * 2);
+          const maxM = Math.max(1, 8  + dm * 2);
+          a = rand(1, maxA); missing = rand(1, Math.max(1, maxM - a)); b = a + missing; op = '+';
+        } else if (level === 'medio') {
+          const maxA = Math.max(2, 12 + dm * 3);
+          const maxM = Math.max(1, 10 + dm * 3);
+          op = Math.random() > 0.5 ? '+' : '-';
+          if (op === '+') { a = rand(1, maxA); missing = rand(1, Math.max(1, maxM)); b = a + missing; }
+          else            { missing = rand(1, Math.max(1, maxM)); b = rand(1, Math.max(2, maxM)); a = b + missing; }
+        } else {
+          const maxA = Math.max(5, 30 + dm * 5);
+          const maxM = Math.max(2, 25 + dm * 5);
+          op = Math.random() > 0.5 ? '+' : '-';
+          if (op === '+') { a = rand(1, maxA); missing = rand(2, Math.max(2, maxM)); b = a + missing; }
+          else            { missing = rand(2, Math.max(2, maxM)); b = rand(1, Math.max(2, maxM)); a = b + missing; }
+        }
+        key = `${a}${op}${missing}=${b}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        qs.push({
+          leftExpr:   op === '+' ? `${a} + ` : `${a} − `,
+          rightValue: b, answer: missing,
+          fullEq:     op === '+' ? `${a} + ${missing} = ${b}` : `${a} − ${missing} = ${b}`,
+          op, a, missing, b
+        });
+      }
+      return qs;
+    }
+
+    function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+    function playTone(notes, dur = 0.12) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        notes.forEach(([freq, t]) => {
+          const osc = ctx.createOscillator(), g = ctx.createGain();
+          osc.connect(g); g.connect(ctx.destination);
+          osc.type = 'sine'; osc.frequency.value = freq;
+          g.gain.setValueAtTime(0.22, ctx.currentTime + t);
+          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + dur);
+          osc.start(ctx.currentTime + t); osc.stop(ctx.currentTime + t + dur + 0.05);
+        });
+      } catch(e) {}
+    }
+
+    const sndCorrect = () => playTone([[523,0],[659,0.13],[784,0.26],[1047,0.4]], 0.15);
+    const sndWrong   = () => playTone([[350,0],[280,0.18]], 0.22);
+    const sndTick    = () => playTone([[900,0]], 0.07);
+    const sndVictory = () => playTone([[523,0],[659,0.1],[784,0.2],[1047,0.32],[1047,0.5],[784,0.62],[1047,0.75]], 0.18);
+    const sndReveal  = () => playTone([[400,0],[300,0.15]], 0.18);
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+    function goToDifficulty() { stopTimer(); showScreen('screen-difficulty'); }
+
+    function startTimer() {
+      seconds = 0; clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        seconds++;
+        const m = Math.floor(seconds / 60), s = String(seconds % 60).padStart(2,'0');
+        document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+      }, 1000);
+    }
+    function stopTimer() { clearInterval(timerInterval); timerInterval = null; }
+    function fmtTime(s) { return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
+
+    function initGame(level) {
+      currentLevel = level; adaptive.reset(); showScreen('screen-tutorial');
+    }
+
+    function beginGame() {
+      questions = generateQuestions(currentLevel);
+      qIndex = 0; score = 0; wrongAnswers = []; firstAttemptCorrect = 0; isLocked = false;
+      const names = { facil: '🌿 Poções Simples', medio: '🔥 Poções Mistas', dificil: '💀 Poções Explosivas' };
+      document.getElementById('levelName').textContent    = names[currentLevel];
+      document.getElementById('scoreDisplay').textContent = '0';
+      showScreen('screen-game'); startTimer(); loadQuestion();
+    }
+
+    function replayGame() { showScreen('screen-tutorial'); }
+
+    function loadQuestion() {
+      attempts = 0; currentInput = ''; isLocked = false;
+      const q = questions[qIndex];
+      document.getElementById('eqLeft').textContent    = q.leftExpr;
+      document.getElementById('eqSlot').textContent    = '?';
+      document.getElementById('eqSlot').style.color    = '';
+      document.getElementById('resultDisplay').textContent = q.rightValue;
+      setScaleTilt('balanced', false);
+      document.getElementById('panLeft').className  = 'scale-pan pan-left';
+      document.getElementById('panRight').className = 'scale-pan pan-right';
+      setDisplayText('—', 'placeholder');
+      hideFeedback(); hideHintBar();
+      for (let i = 0; i < MAX_ATTEMPTS; i++) document.getElementById(`dot${i}`).className = 'attempt-dot spare';
+      const pct = (qIndex / TOTAL_Q) * 100;
+      document.getElementById('qProgressFill').style.width = pct + '%';
+      document.getElementById('qProgressText').textContent = `${qIndex + 1} / ${TOTAL_Q}`;
+    }
+
+    function numInput(digit) {
+      if (isLocked || currentInput.length >= 3) return;
+      sndTick(); currentInput += digit;
+      setDisplayText(currentInput, 'active');
+      document.getElementById('eqSlot').textContent = currentInput;
+      document.getElementById('eqSlot').style.color = 'var(--lab-green)';
+    }
+
+    function numDelete() {
+      if (isLocked || !currentInput.length) return;
+      currentInput = currentInput.slice(0, -1);
+      setDisplayText(currentInput || '—', currentInput ? 'active' : 'placeholder');
+      document.getElementById('eqSlot').textContent = currentInput || '?';
+      if (!currentInput) document.getElementById('eqSlot').style.color = '';
+    }
+
+    function setDisplayText(txt, state) {
+      const el = document.getElementById('answerDisplay'), sp = document.getElementById('displayText');
+      sp.textContent = txt;
+      el.className = 'answer-display' + (state === 'correct' ? ' correct' : state === 'wrong' ? ' wrong' : '');
+      sp.className  = state === 'placeholder' ? 'answer-placeholder' : '';
+    }
+
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('screen-game').classList.contains('active')) return;
+      if (e.key >= '0' && e.key <= '9') numInput(e.key);
+      else if (e.key === 'Backspace') numDelete();
+      else if (e.key === 'Enter')     confirmAnswer();
+    });
+
+    function setScaleTilt(state, success = false) {
+      document.getElementById('scaleBeam').className = `scale-beam ${state}${success ? ' success' : ''}`;
+    }
+
+    let fbTimer = null;
+    function showFeedback(msg, type) {
+      const el = document.getElementById('feedbackPill');
+      clearTimeout(fbTimer); el.textContent = msg;
+      el.className = `feedback-pill ${type} show`;
+    }
+    function hideFeedback() { document.getElementById('feedbackPill').classList.remove('show'); }
+    function showHintBar(msg) { const el = document.getElementById('hintBar'); el.textContent = msg; el.classList.add('show'); }
+    function hideHintBar()    { document.getElementById('hintBar').classList.remove('show'); }
+
+    function confirmAnswer() {
+      if (isLocked || !currentInput) return;
+      const q = questions[qIndex], input = parseInt(currentInput, 10), answer = q.answer;
+      attempts++;
+      if (attempts <= MAX_ATTEMPTS) document.getElementById(`dot${attempts - 1}`).className = 'attempt-dot used';
+
+      if (input === answer) {
+        const pts = MAX_ATTEMPTS + 1 - attempts;
+        score += pts;
+        if (attempts === 1) firstAttemptCorrect++;
+        document.getElementById('scoreDisplay').textContent = score;
+        adaptive.record(true, attempts === 1);
+        hideHintBar();
+        document.getElementById('eqSlot').textContent = answer;
+        document.getElementById('eqSlot').style.color = 'var(--lab-green)';
+        setDisplayText(String(input), 'correct');
+        setScaleTilt('balanced', true);
+        sndCorrect();
+        showFeedback('🧪 Fórmula correta! Poção concluída!', 'correct');
+        document.getElementById('panLeft').classList.add('correct-glow');
+        document.getElementById('panRight').classList.add('correct-glow');
+        isLocked = true;
+        setTimeout(() => nextQuestion(), 1600);
+      } else {
+        sndWrong();
+        setDisplayText(String(input), 'wrong');
+        document.getElementById('answerDisplay').classList.add('shake');
+        setTimeout(() => document.getElementById('answerDisplay').classList.remove('shake'), 400);
+        const leftVal = q.op === '+' ? q.a + input : q.a - input;
+        if (leftVal > q.rightValue) {
+          setScaleTilt('tilt-left');
+          showFeedback('🔬 Concentrado demais! Reduza a dose.', 'high');
+        } else {
+          setScaleTilt('tilt-right');
+          showFeedback('💧 Fraco demais! Aumente a dose.', 'low');
+        }
+        if (adaptive.hintLevel >= 1) {
+          const lo = Math.max(1, answer - (adaptive.hintLevel >= 2 ? 2 : 4));
+          const hi = answer + (adaptive.hintLevel >= 2 ? 2 : 4);
+          showHintBar(`💡 Dica: a dose certa está entre ${lo} e ${hi}`);
+        }
+        document.getElementById('panLeft').classList.add('wrong-glow');
+        document.getElementById('panRight').classList.add('wrong-glow');
+        setTimeout(() => {
+          document.getElementById('panLeft').classList.remove('wrong-glow');
+          document.getElementById('panRight').classList.remove('wrong-glow');
+        }, 700);
+
+        if (attempts >= MAX_ATTEMPTS) {
+          adaptive.record(false); isLocked = true;
+          setTimeout(() => {
+            sndReveal();
+            document.getElementById('eqSlot').textContent = answer;
+            document.getElementById('eqSlot').style.color = 'var(--lab-green)';
+            setScaleTilt('balanced', true);
+            showFeedback(`🧫 A dose certa era ${answer}. Não desanime!`, 'correct');
+            wrongAnswers.push(q);
+            setTimeout(() => nextQuestion(), 2000);
+          }, 800);
+        } else {
+          setTimeout(() => {
+            currentInput = '';
+            setDisplayText('—', 'placeholder');
+            document.getElementById('eqSlot').textContent = '?';
+            document.getElementById('eqSlot').style.color = '';
+            setScaleTilt('balanced', false);
+            hideFeedback();
+          }, 1200);
+        }
+      }
+    }
+
+    function nextQuestion() {
+      qIndex++;
+      if (qIndex >= TOTAL_Q) endGame();
+      else { isLocked = false; loadQuestion(); }
+    }
+
+    function endGame() {
+      stopTimer();
+      const maxScore = TOTAL_Q * 3;
+      const stars    = score >= maxScore * 0.85 ? 3 : score >= maxScore * 0.6 ? 2 : 1;
+      const accuracy = Math.round((firstAttemptCorrect / TOTAL_Q) * 100);
+      document.getElementById('vScore').textContent    = `${score}/${maxScore}`;
+      document.getElementById('vTime').textContent     = fmtTime(seconds);
+      document.getElementById('vAccuracy').textContent = accuracy + '%';
+      const msgs = {
+        3: { emoji: '🏆', title: 'Cientista Mestre!', sub: 'Você completou todas as fórmulas com perfeição!' },
+        2: { emoji: '🎉', title: 'Ótimo Trabalho!',   sub: 'Quase perfeito! Continue seus experimentos.' },
+        1: { emoji: '💪', title: 'Bom Esforço!',      sub: 'Pratique mais para dominar as fórmulas!' }
+      };
+      const m = msgs[stars];
+      document.getElementById('vEmoji').textContent = m.emoji;
+      document.getElementById('vTitle').textContent = m.title;
+      document.getElementById('vSub').textContent   = m.sub;
+      const starMsgs = {
+        3: `🌟 Perfeito! ${score} pontos. Você acertou ${firstAttemptCorrect} de ${TOTAL_Q} na primeira mistura!`,
+        2: `👏 Bom! ${score} pontos. Acerte mais na 1ª mistura para 3 estrelas.`,
+        1: `💡 ${score} pontos. Revise as fórmulas abaixo e tente de novo!`
+      };
+      document.getElementById('vStarMsg').textContent = starMsgs[stars];
+      if (wrongAnswers.length > 0) {
+        document.getElementById('wrongList').innerHTML = wrongAnswers.map(q =>
+          `<div class="review-item">
+            <span class="review-eq">${q.leftExpr}? = ${q.rightValue}</span>
+            <span class="review-correct">→ ${q.answer}</span>
+          </div>`
+        ).join('');
+        document.getElementById('wrongReview').classList.remove('hidden');
+      } else {
+        document.getElementById('wrongReview').classList.add('hidden');
+      }
+      showScreen('screen-victory');
+      setTimeout(() => {
+        for (let i = 1; i <= stars; i++)
+          setTimeout(() => document.getElementById(`star${i}`).classList.add('earned'), (i-1)*320);
+      }, 200);
+      sndVictory();
+      launchConfetti();
+    }
+
+    function launchConfetti() {
+      const c = document.getElementById('confettiWrap');
+      c.innerHTML = '';
+      const colors = ['#00E676','#40C4FF','#CE93D8','#FFD740','#FF5252','#80CBC4','#00BCD4'];
+      for (let i = 0; i < 80; i++) {
+        const p = document.createElement('div');
+        p.className = 'cp';
+        p.style.cssText = `
+          left:${Math.random()*100}vw;
+          background:${colors[Math.floor(Math.random()*colors.length)]};
+          width:${6+Math.random()*8}px; height:${6+Math.random()*8}px;
+          border-radius:${Math.random()>.5?'50%':'2px'};
+          animation-duration:${1.5+Math.random()*2}s;
+          animation-delay:${Math.random()*1.2}s;
+        `;
+        c.appendChild(p);
+      }
+    }
+  </script>
+  <script src="../nipo.js"></script>
+</body>
+</html>

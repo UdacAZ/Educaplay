@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EducaPlay – Mercado do Aluno</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --mkt-green:    #1B5E20;
+      --mkt-green-m:  #2E7D32;
+      --mkt-green-l:  #388E3C;
+      --mkt-green-xl: #4CAF50;
+      --mkt-red:      #B71C1C;
+      --mkt-red-l:    #E53935;
+      --mkt-yellow:   #F9A825;
+      --mkt-yellow-l: #FFF8E1;
+      --mkt-cream:    #FAFAF5;
+      --mkt-cream-d:  #F0EDE4;
+      --mkt-brown:    #5D4037;
+      --mkt-white:    #FFFFFF;
+      --shadow-card:  0 4px 20px rgba(0,0,0,0.18);
+      --shadow-lg:    0 8px 32px rgba(0,0,0,0.25);
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background:
+        linear-gradient(rgba(0,0,0,0.42), rgba(0,0,0,0.42)),
+        url('../imag/fundo_mercado.png') center/cover fixed;
+    }
+
+    .screen { display: none; width: 100%; max-width: 600px; padding: 16px; }
+    .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+    /* ════════════════════════════
+       DIFFICULTY SCREEN
+    ════════════════════════════ */
+    #screenDiff {
+      max-width: 700px;
+      padding: 0;
+    }
+
+    .market-sign {
+      background: linear-gradient(135deg, var(--mkt-green), var(--mkt-green-m));
+      border-radius: 0 0 24px 24px;
+      padding: 28px 28px 32px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .market-sign::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 24px,
+        transparent 24px, transparent 48px
+      );
+    }
+    .market-sign-icon {
+      font-size: 4rem; display: block; margin-bottom: 8px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.35));
+    }
+    .market-sign h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.2rem; color: #FFFFFF;
+      text-shadow: 2px 3px 0 rgba(0,0,0,0.3);
+      margin-bottom: 4px;
+    }
+    .market-sign p {
+      color: rgba(255,255,255,0.88); font-size: 1rem; font-weight: 600;
+    }
+    .market-sign-hours {
+      display: inline-flex; align-items: center; gap: 8px; margin-top: 12px;
+      background: rgba(0,0,0,0.25); border-radius: 30px;
+      padding: 6px 18px; font-size: 0.82rem; font-weight: 700; color: #FFE57F;
+    }
+
+    .diff-sections-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem; color: #FFFFFF;
+      text-align: center; margin-bottom: 12px; padding: 0 16px;
+      text-shadow: 1px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .diff-cards {
+      display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+      padding: 0 16px 24px;
+    }
+    .diff-card {
+      background: var(--mkt-white);
+      border-radius: 18px;
+      width: 190px; text-align: center; cursor: pointer;
+      border: 3px solid transparent;
+      box-shadow: var(--shadow-card);
+      transition: all .22s;
+      display: flex; flex-direction: column; align-items: center;
+      overflow: hidden;
+    }
+    .diff-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+    .diff-card-banner {
+      width: 100%; padding: 8px 10px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 0.85rem; letter-spacing: 1px;
+      color: white; text-align: center;
+    }
+    .facil   .diff-card-banner { background: var(--mkt-green-l); }
+    .medio   .diff-card-banner { background: #E65100; }
+    .dificil .diff-card-banner { background: var(--mkt-red); }
+    .facil:hover   { border-color: var(--mkt-green-l); }
+    .medio:hover   { border-color: #E65100; }
+    .dificil:hover { border-color: var(--mkt-red); }
+
+    .diff-card-body { padding: 18px 16px 22px; }
+    .diff-emoji { font-size: 2.8rem; margin-bottom: 10px; display: block; }
+    .diff-name  {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.15rem; color: var(--mkt-green); margin-bottom: 6px;
+    }
+    .diff-desc  { font-size: 0.8rem; color: #666; line-height: 1.5; }
+    .diff-play-btn {
+      margin-top: 14px; padding: 10px 22px;
+      border: none; border-radius: 30px; cursor: pointer;
+      font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 800;
+      color: white; transition: all .18s;
+    }
+    .facil   .diff-play-btn { background: var(--mkt-green-l); }
+    .facil   .diff-play-btn:hover { background: var(--mkt-green-m); }
+    .medio   .diff-play-btn { background: #E65100; }
+    .medio   .diff-play-btn:hover { background: #BF360C; }
+    .dificil .diff-play-btn { background: var(--mkt-red); }
+    .dificil .diff-play-btn:hover { background: var(--mkt-red-l); }
+
+    /* ════════════════════════════
+       TUTORIAL SCREEN
+    ════════════════════════════ */
+    .tuto-box {
+      background: var(--mkt-white);
+      border-radius: 20px; padding: 30px 26px; width: 100%;
+      box-shadow: var(--shadow-lg);
+      border-top: 8px solid var(--mkt-green-m);
+      position: relative;
+    }
+    .tuto-box::before {
+      content: '🛒 COMO FUNCIONA O CAIXA';
+      position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+      background: var(--mkt-green-m); color: white;
+      font-family: 'Fredoka One', cursive; font-size: 13px; letter-spacing: 0.5px;
+      padding: 4px 20px; border-radius: 20px; white-space: nowrap;
+    }
+    .tuto-box h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.5rem; color: var(--mkt-green); margin-bottom: 22px; text-align: center; margin-top: 8px;
+    }
+    .tuto-steps { display: flex; flex-direction: column; gap: 14px; margin-bottom: 26px; }
+    .tuto-step  { display: flex; align-items: flex-start; gap: 14px; }
+    .tuto-step-num {
+      min-width: 36px; height: 36px; border-radius: 50%;
+      background: var(--mkt-green-m); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 16px; flex-shrink: 0;
+    }
+    .tuto-step p { font-size: 15px; color: #4a5568; line-height: 1.55; padding-top: 4px; }
+
+    /* ════════════════════════════
+       GAME SCREEN
+    ════════════════════════════ */
+
+    /* Top bar — supermarket counter */
+    .game-top {
+      width: 100%;
+      background: linear-gradient(135deg, var(--mkt-green), var(--mkt-green-m));
+      border-radius: 16px; padding: 12px 18px;
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-card);
+    }
+    .game-back {
+      background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.35);
+      border-radius: 10px; padding: 7px 13px; cursor: pointer;
+      font-size: 18px; color: white; transition: background .15s;
+    }
+    .game-back:hover { background: rgba(255,255,255,0.3); }
+    .game-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem; color: white;
+      text-shadow: 1px 2px 0 rgba(0,0,0,0.25);
+    }
+    .game-score {
+      margin-left: auto;
+      background: var(--mkt-yellow); border-radius: 20px;
+      padding: 5px 14px; font-size: 14px; font-weight: 900;
+      color: var(--mkt-brown);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    /* Progress row */
+    .progress-row {
+      width: 100%; display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px; padding: 0 2px;
+    }
+    .progress-text {
+      font-size: 13px; color: white; font-weight: 700;
+      background: rgba(0,0,0,0.35); border-radius: 20px; padding: 4px 12px;
+    }
+    .stopwatch {
+      font-size: 13px; font-weight: 700; color: white;
+      background: rgba(0,0,0,0.35); border-radius: 20px; padding: 4px 12px;
+    }
+
+    /* Question card — like a store sign on the shelf */
+    .question-card {
+      background: var(--mkt-white);
+      border-radius: 14px; padding: 14px 20px;
+      width: 100%; text-align: center;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 14px;
+      border-left: 6px solid var(--mkt-green-m);
+      border-right: 6px solid var(--mkt-green-m);
+    }
+    .question-card p {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.15rem; color: var(--mkt-green); font-weight: 900; line-height: 1.4;
+    }
+
+    /* Cart / shelf area */
+    .cart-area {
+      display: flex; gap: 10px; justify-content: center;
+      flex-wrap: wrap; width: 100%; margin-bottom: 12px;
+    }
+
+    /* Product card — price tag on shelf */
+    .product-card {
+      background: var(--mkt-white);
+      border-radius: 14px;
+      box-shadow: var(--shadow-card);
+      display: flex; flex-direction: column; align-items: center;
+      min-width: 90px; flex: 1; max-width: 130px;
+      overflow: hidden;
+      border: 2px solid var(--mkt-cream-d);
+      transition: transform .15s;
+    }
+    .product-card:hover { transform: translateY(-3px); }
+    .product-card-top {
+      width: 100%; background: var(--mkt-green-m);
+      padding: 3px 6px; text-align: center;
+    }
+    .product-name  { font-size: 11px; color: white; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+    .product-card-body { padding: 10px 10px 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .product-emoji { font-size: 34px; line-height: 1; }
+
+    /* Price tag — the iconic red sticker */
+    .product-price-wrap {
+      width: 100%;
+      background: var(--mkt-red);
+      border-radius: 0 0 10px 10px;
+      padding: 7px 8px; text-align: center; margin-top: 6px;
+    }
+    .product-price-label { font-size: 9px; color: rgba(255,255,255,0.75); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; }
+    .product-price {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem; color: white;
+      display: block; line-height: 1;
+    }
+
+    /* Payment display — receipt paper */
+    .payment-display {
+      background: var(--mkt-cream);
+      border: 2px solid var(--mkt-cream-d);
+      border-radius: 12px; padding: 14px 20px;
+      width: 100%; margin-bottom: 12px;
+      position: relative; overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+    .payment-display::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 5px;
+      background: repeating-linear-gradient(90deg, var(--mkt-green-m) 0px, var(--mkt-green-m) 8px, transparent 8px, transparent 16px);
+    }
+    .pay-inner { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .pay-section { text-align: center; flex: 1; }
+    .pay-divider { width: 1px; background: var(--mkt-cream-d); height: 40px; }
+    .pay-label  { font-size: 11px; color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 2px; }
+    .pay-amount {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.5rem; color: var(--mkt-green); display: block;
+    }
+    .pay-amount.red { color: var(--mkt-red); }
+
+    /* Hint bar — store bulletin board */
+    .hint-bar {
+      width: 100%;
+      background: var(--mkt-yellow-l);
+      border: 2px solid var(--mkt-yellow);
+      border-radius: 12px; padding: 10px 16px;
+      font-size: 14px; color: var(--mkt-brown);
+      text-align: center; margin-bottom: 12px; display: none;
+      font-weight: 700;
+    }
+    .hint-bar.show { display: block; }
+
+    /* Answer buttons — cash register keys */
+    .answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+    .answer-btn {
+      background: var(--mkt-white);
+      border: 3px solid var(--mkt-cream-d);
+      border-radius: 16px; padding: 16px 8px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.3rem; color: var(--mkt-green);
+      cursor: pointer; transition: all .15s;
+      box-shadow: var(--shadow-card);
+      position: relative; overflow: hidden;
+    }
+    .answer-btn::before {
+      content: 'R$';
+      position: absolute; top: 8px; left: 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 9px; font-weight: 700; color: #aaa; letter-spacing: 0.5px;
+    }
+    .answer-btn:hover:not(:disabled) {
+      background: var(--mkt-green-xl);
+      border-color: var(--mkt-green-m);
+      color: white; transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+    .answer-btn:hover:not(:disabled)::before { color: rgba(255,255,255,0.7); }
+    .answer-btn.correct {
+      background: #E8F5E9; border-color: var(--mkt-green-l); color: var(--mkt-green);
+      transform: scale(1.04);
+    }
+    .answer-btn.wrong   { background: #FFEBEE; border-color: var(--mkt-red-l); color: var(--mkt-red); }
+    .answer-btn:disabled { cursor: default; }
+
+    /* ════════════════════════════
+       VICTORY SCREEN — receipt style
+    ════════════════════════════ */
+    .vic-receipt {
+      background: var(--mkt-white);
+      border-radius: 4px 4px 0 0;
+      width: 100%; max-width: 420px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      padding-bottom: 24px;
+    }
+    /* Receipt serrated top */
+    .vic-receipt::before {
+      content: '';
+      position: absolute; top: -12px; left: 0; right: 0; height: 12px;
+      background:
+        radial-gradient(circle at 50% 100%, white 70%, transparent 70%) -12px 0 / 24px 12px repeat-x,
+        var(--mkt-green);
+    }
+    /* Receipt serrated bottom */
+    .vic-receipt::after {
+      content: '';
+      position: absolute; bottom: -12px; left: 0; right: 0; height: 12px;
+      background: radial-gradient(circle at 50% 0%, white 70%, transparent 70%) -12px 0 / 24px 12px repeat-x;
+    }
+
+    .receipt-header {
+      background: var(--mkt-green);
+      padding: 24px 20px 20px; text-align: center;
+    }
+    .receipt-store { font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: white; }
+    .receipt-sub   { font-size: 0.8rem; color: rgba(255,255,255,0.75); font-weight: 600; margin-top: 2px; }
+
+    .receipt-body { padding: 20px 24px; }
+    .receipt-line {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 6px 0; border-bottom: 1px dashed #ddd; font-size: 14px; color: #555;
+    }
+    .receipt-line:last-child { border-bottom: none; }
+    .receipt-line strong { color: #222; }
+
+    .receipt-total-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0 8px; margin-top: 4px;
+      border-top: 2px solid #ddd;
+    }
+    .receipt-total-label { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: var(--mkt-green); }
+    .receipt-total-val   { font-family: 'Fredoka One', cursive; font-size: 1.6rem; color: var(--mkt-green); }
+
+    .vic-emoji  { font-size: 3.5rem; display: block; text-align: center; margin: 16px 0 6px; }
+    .vic-card-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.8rem; color: var(--mkt-green); text-align: center; margin-bottom: 4px;
+    }
+    .vic-card-msg { font-size: 14px; color: #777; text-align: center; margin-bottom: 16px; }
+    .vic-stars { font-size: 2.8rem; letter-spacing: 6px; text-align: center; margin-bottom: 16px; display: block; }
+
+    .vic-stats { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+    .vic-stat {
+      background: var(--mkt-cream); border-radius: 12px; padding: 12px 18px;
+      border: 2px solid var(--mkt-cream-d); text-align: center;
+    }
+    .vic-stat .stat-num   { font-family: 'Fredoka One', cursive; font-size: 1.8rem; color: var(--mkt-green); display: block; }
+    .vic-stat .stat-label { font-size: 11px; color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .receipt-thanks {
+      text-align: center; font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem; color: var(--mkt-green-m); margin: 4px 0 16px;
+      border-top: 2px dashed #ddd; border-bottom: 2px dashed #ddd;
+      padding: 10px 0;
+    }
+
+    .vic-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; padding: 0 20px; }
+
+    /* ════════════════════════════
+       SHARED BUTTONS
+    ════════════════════════════ */
+    .btn { border: none; border-radius: 14px; padding: 13px 26px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all .2s; font-family: 'Nunito', sans-serif; }
+    .btn-primary { background: #5D4037; color: white; }
+    .btn-primary:hover { background: #4E342E; transform: translateY(-2px); }
+    .btn-outline { background: transparent; color: var(--mkt-green-m); border: 2px solid var(--mkt-green-m); }
+    .btn-outline:hover { background: #E8F5E9; }
+    .btn-market { background: linear-gradient(135deg, var(--mkt-green-m), var(--mkt-green-l)); color: white; box-shadow: 0 4px 14px rgba(46,125,50,0.35); }
+    .btn-market:hover { background: linear-gradient(135deg, var(--mkt-green), var(--mkt-green-m)); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(46,125,50,0.45); }
+
+    @media (max-width: 480px) {
+      .screen { padding: 10px; }
+      .product-card { min-width: 74px; }
+      .product-emoji { font-size: 26px; }
+      .answer-btn { font-size: 1.1rem; padding: 14px 6px; }
+      .diff-card { width: 100%; max-width: 280px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════
+     DIFFICULTY SCREEN
+══════════════════════════ -->
+<div class="screen active" id="screenDiff">
+
+  <div class="market-sign">
+    <span class="market-sign-icon">🏪</span>
+    <h1>Mercado do Aluno</h1>
+    <p>Calcule totais e troco como um verdadeiro caixa!</p>
+    <div class="market-sign-hours">🕘 Aberto · Escolha seu nível para entrar</div>
+  </div>
+
+  <div class="diff-sections-title">🛒 Escolha a seção do mercado:</div>
+
+  <div class="diff-cards">
+    <div class="diff-card facil" onclick="startGame('facil')">
+      <div class="diff-card-banner">🥬 HORTIFRÚTI</div>
+      <div class="diff-card-body">
+        <span class="diff-emoji">🌟</span>
+        <div class="diff-name">Fácil</div>
+        <div class="diff-desc">Valores inteiros<br>2 produtos · Só totais</div>
+        <button class="diff-play-btn">Entrar! →</button>
+      </div>
+    </div>
+    <div class="diff-card medio" onclick="startGame('medio')">
+      <div class="diff-card-banner">🧀 LATICÍNIOS</div>
+      <div class="diff-card-body">
+        <span class="diff-emoji">🔥</span>
+        <div class="diff-name">Médio</div>
+        <div class="diff-desc">Com centavos<br>3 produtos · Inclui troco</div>
+        <button class="diff-play-btn">Entrar! →</button>
+      </div>
+    </div>
+    <div class="diff-card dificil" onclick="startGame('dificil')">
+      <div class="diff-card-banner">🍞 PADARIA</div>
+      <div class="diff-card-body">
+        <span class="diff-emoji">💎</span>
+        <div class="diff-name">Difícil</div>
+        <div class="diff-desc">Centavos variados<br>4 produtos · Troco frequente</div>
+        <button class="diff-play-btn">Entrar! →</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════
+     TUTORIAL SCREEN
+══════════════════════════ -->
+<div class="screen" id="screenTuto">
+  <div class="tuto-box">
+    <h2>🛒 Manual do Caixa</h2>
+    <div class="tuto-steps">
+      <div class="tuto-step">
+        <div class="tuto-step-num">1</div>
+        <p>Você verá produtos na prateleira, cada um com sua <strong>etiqueta de preço</strong>.</p>
+      </div>
+      <div class="tuto-step">
+        <div class="tuto-step-num">2</div>
+        <p>Some os preços para descobrir o <strong>total da compra</strong>.</p>
+      </div>
+      <div class="tuto-step">
+        <div class="tuto-step-num">3</div>
+        <p>Às vezes você vai calcular o <strong>troco</strong>: valor pago menos o total da compra.</p>
+      </div>
+      <div class="tuto-step">
+        <div class="tuto-step-num">4</div>
+        <p>Clique na <strong>resposta certa</strong> — quanto mais rápido, mais pontos!</p>
+      </div>
+    </div>
+    <button class="btn btn-market" style="width:100%; font-size:18px; padding:16px;" onclick="beginGame()">
+      Abrir o Caixa! 🧾
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     GAME SCREEN
+══════════════════════════ -->
+<div class="screen" id="screenGame">
+
+  <div class="game-top">
+    <button class="game-back" onclick="goBack()">←</button>
+    <span class="game-title">🏪 Mercado do Aluno</span>
+    <div class="game-score">⭐ <span id="scoreDisplay">0</span></div>
+  </div>
+
+  <div class="progress-row">
+    <span class="progress-text" id="progressText">Pergunta 1 de 5</span>
+    <span class="stopwatch" id="stopwatch">⏱ 0s</span>
+  </div>
+
+  <div class="question-card">
+    <p id="questionText">Quanto você vai pagar no total?</p>
+  </div>
+
+  <!-- Shelf / Cart -->
+  <div class="cart-area" id="cartArea"></div>
+
+  <!-- Payment display — receipt style -->
+  <div class="payment-display" id="paymentDisplay" style="display:none;">
+    <div class="pay-inner">
+      <div class="pay-section">
+        <span class="pay-label">Total dos Produtos</span>
+        <span class="pay-amount" id="totalAmountDisplay">R$ 0,00</span>
+      </div>
+      <div class="pay-divider"></div>
+      <div class="pay-section">
+        <span class="pay-label">💵 Você Pagou</span>
+        <span class="pay-amount red" id="payAmount">R$ 20,00</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint-bar" id="hintBar"></div>
+
+  <div class="answer-grid" id="answerGrid"></div>
+
+</div>
+
+<!-- ══════════════════════════
+     VICTORY SCREEN
+══════════════════════════ -->
+<div class="screen" id="screenVic">
+  <div class="vic-receipt">
+
+    <div class="receipt-header">
+      <div class="receipt-store">🏪 Mercado do Aluno</div>
+      <div class="receipt-sub">EducaPlay · Cupom de Resultado</div>
+    </div>
+
+    <div class="receipt-body">
+      <span class="vic-emoji" id="vicEmoji">🎉</span>
+      <div class="vic-card-title" id="vicTitle">Parabéns!</div>
+      <div class="vic-card-msg"   id="vicMsg">Você concluiu o Mercado do Aluno!</div>
+      <span class="vic-stars"     id="vicStars">⭐⭐⭐</span>
+
+      <div class="vic-stats">
+        <div class="vic-stat">
+          <span class="stat-num" id="statCorrect">0</span>
+          <span class="stat-label">Acertos</span>
+        </div>
+        <div class="vic-stat">
+          <span class="stat-num" id="statTotal">0</span>
+          <span class="stat-label">Questões</span>
+        </div>
+        <div class="vic-stat">
+          <span class="stat-num" id="statScore">0</span>
+          <span class="stat-label">Pontos</span>
+        </div>
+      </div>
+
+      <div class="receipt-thanks">🙏 OBRIGADO PELA VISITA! 🙏</div>
+
+      <div class="vic-btns">
+        <button class="btn btn-outline" onclick="goToDiff()">Mudar Nível</button>
+        <button class="btn btn-market"  onclick="restartGame()">Jogar Novamente</button>
+        <button class="btn btn-primary" onclick="window.location.href='../dashboard.html'">Início</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const LEVELS = {
+    facil:   { name: 'Fácil',   questions: 5, maxItems: 2, troco: false },
+    medio:   { name: 'Médio',   questions: 7, maxItems: 3, troco: true  },
+    dificil: { name: 'Difícil', questions: 8, maxItems: 4, troco: true  },
+  };
+
+  const PRODUCTS = [
+    { name: 'Maçã',      emoji: '🍎' }, { name: 'Banana',    emoji: '🍌' },
+    { name: 'Uva',       emoji: '🍇' }, { name: 'Laranja',   emoji: '🍊' },
+    { name: 'Morango',   emoji: '🍓' }, { name: 'Leite',     emoji: '🥛' },
+    { name: 'Suco',      emoji: '🧃' }, { name: 'Pão',       emoji: '🍞' },
+    { name: 'Biscoito',  emoji: '🍪' }, { name: 'Chocolate', emoji: '🍫' },
+    { name: 'Queijo',    emoji: '🧀' }, { name: 'Ovos',      emoji: '🥚' },
+    { name: 'Sorvete',   emoji: '🍨' }, { name: 'Pipoca',    emoji: '🍿' },
+    { name: 'Cenoura',   emoji: '🥕' }, { name: 'Tomate',    emoji: '🍅' },
+    { name: 'Iogurte',   emoji: '🫙' }, { name: 'Amendoim',  emoji: '🥜' },
+    { name: 'Pirulito',  emoji: '🍭' }, { name: 'Salgado',   emoji: '🥐' },
+  ];
+
+  const TOTAL_PHRASES = [
+    'Quanto você vai pagar no total?',
+    'Qual é o total desta compra?',
+    'Somando tudo, quanto custa?',
+  ];
+  const TROCO_PHRASES = [
+    'Quanto de troco você vai receber?',
+    'Qual é o troco desta compra?',
+    'Quanto o caixa vai te devolver?',
+  ];
+
+  const BILLS = [500, 1000, 2000, 5000, 10000];
+
+  const adaptive = {
+    history: [], diffMod: 0, hintLevel: 0,
+    reset() { this.history = []; this.diffMod = 0; this.hintLevel = 0; },
+    record(correct, fast = false) {
+      const pts = correct ? (fast ? 2 : 1) : -1;
+      this.history.push(pts);
+      if (this.history.length > 5) this.history.shift();
+      if (this.history.length >= 3) this._evaluate();
+    },
+    _evaluate() {
+      const sum = this.history.reduce((a, b) => a + b, 0);
+      if (sum <= -3) {
+        this.diffMod  = Math.max(-2, this.diffMod - 1);
+        this.hintLevel = Math.min(2, this.hintLevel + 1);
+      } else if (sum >= 5) {
+        this.diffMod  = Math.min(2, this.diffMod + 1);
+        this.hintLevel = Math.max(0, this.hintLevel - 1);
+      } else if (sum >= 3 && this.hintLevel > 0) {
+        this.hintLevel = Math.max(0, this.hintLevel - 1);
+      }
+    }
+  };
+
+  let levelKey, level, qIndex, totalQ, score, correctCount;
+  let timerInterval, stopwatchSecs;
+  let currentQ, answered, questionStart;
+  let hint1Timer, hint2Timer;
+
+  function startGame(key) {
+    levelKey = key; level = LEVELS[key];
+    adaptive.reset();
+    showScreen('screenTuto');
+  }
+
+  function beginGame() {
+    qIndex = 0; totalQ = level.questions;
+    score = 0; correctCount = 0;
+    document.getElementById('scoreDisplay').textContent = '0';
+    showScreen('screenGame');
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    answered = false;
+    clearInterval(timerInterval);
+    clearTimeout(hint1Timer);
+    clearTimeout(hint2Timer);
+    hideHintBar();
+
+    currentQ = generateQuestion(adaptive.diffMod);
+    questionStart = Date.now();
+
+    document.getElementById('progressText').textContent = `Pergunta ${qIndex + 1} de ${totalQ}`;
+    const phrases = currentQ.isTroco ? TROCO_PHRASES : TOTAL_PHRASES;
+    document.getElementById('questionText').textContent = phrases[Math.floor(Math.random() * phrases.length)];
+
+    renderCart(currentQ.products);
+
+    const payDisp = document.getElementById('paymentDisplay');
+    if (currentQ.isTroco) {
+      payDisp.style.display = '';
+      document.getElementById('totalAmountDisplay').textContent = formatMoney(currentQ.totalCents);
+      document.getElementById('payAmount').textContent = formatMoney(currentQ.paymentCents);
+    } else {
+      payDisp.style.display = 'none';
+    }
+
+    buildAnswerButtons(currentQ.answerCents);
+
+    if (adaptive.hintLevel >= 1) {
+      hint1Timer = setTimeout(() => {
+        if (!answered) {
+          if (currentQ.isTroco) showHintBar(`💡 Dica: o total é ${formatMoney(currentQ.totalCents)}. Subtraia do valor pago!`);
+          else showHintBar('💡 Dica: some os preços um de cada vez com calma!');
+        }
+      }, 10000);
+    }
+    if (adaptive.hintLevel >= 2) {
+      hint2Timer = setTimeout(() => {
+        if (!answered) showHintBar(`💡 A resposta é ${formatMoney(currentQ.answerCents)}. Tente entender o raciocínio!`);
+      }, 20000);
+    }
+
+    startStopwatch();
+  }
+
+  function generateQuestion(dm) {
+    let numItems = level.maxItems;
+    if (dm <= -2)      numItems = Math.max(2, numItems - 2);
+    else if (dm === -1) numItems = Math.max(2, numItems - 1);
+    else if (dm >= 2)   numItems = Math.min(numItems + 1, 4);
+
+    const products = shuffle([...PRODUCTS]).slice(0, numItems).map(p => ({
+      name: p.name, emoji: p.emoji, priceCents: genPrice(dm),
+    }));
+
+    const totalCents = products.reduce((s, p) => s + p.priceCents, 0);
+    const isTroco = level.troco && Math.random() < 0.45;
+    let paymentCents = null, answerCents;
+
+    if (isTroco) {
+      const valid = BILLS.filter(b => b > totalCents);
+      paymentCents = valid.length
+        ? valid[Math.floor(Math.random() * Math.min(3, valid.length))]
+        : BILLS[BILLS.length - 1];
+      answerCents = paymentCents - totalCents;
+    } else {
+      answerCents = totalCents;
+    }
+
+    return { products, totalCents, isTroco, paymentCents, answerCents };
+  }
+
+  function genPrice(dm) {
+    if (levelKey === 'facil') {
+      const maxC = Math.max(300, 900 + dm * -150);
+      const range = Math.floor((maxC - 100) / 100);
+      return 100 + Math.floor(Math.random() * range) * 100;
+    }
+    if (levelKey === 'medio') {
+      const maxC = Math.max(300, 1200 + dm * -150);
+      const range = Math.floor((maxC - 100) / 50);
+      return 100 + Math.floor(Math.random() * range) * 50;
+    }
+    const maxC = Math.max(300, 1500 + dm * -200);
+    const range = Math.floor((maxC - 125) / 25);
+    return 125 + Math.floor(Math.random() * range) * 25;
+  }
+
+  function renderCart(products) {
+    const cart = document.getElementById('cartArea');
+    cart.innerHTML = '';
+    products.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.innerHTML = `
+        <div class="product-card-top">
+          <span class="product-name">${p.name}</span>
+        </div>
+        <div class="product-card-body">
+          <span class="product-emoji">${p.emoji}</span>
+        </div>
+        <div class="product-price-wrap">
+          <span class="product-price-label">preço</span>
+          <span class="product-price">${formatMoney(p.priceCents)}</span>
+        </div>
+      `;
+      cart.appendChild(card);
+    });
+  }
+
+  function buildAnswerButtons(correctCents) {
+    const grid = document.getElementById('answerGrid');
+    grid.innerHTML = '';
+    generateOptions(correctCents).forEach(val => {
+      const btn = document.createElement('button');
+      btn.className = 'answer-btn';
+      btn.dataset.cents = val;
+      btn.textContent = formatMoney(val);
+      btn.onclick = () => onAnswer(btn, val, correctCents);
+      grid.appendChild(btn);
+    });
+  }
+
+  function generateOptions(correctCents) {
+    let offsets;
+    if (levelKey === 'facil')       offsets = [100, 200, 300, 400, 500];
+    else if (levelKey === 'medio')  offsets = [50, 100, 200, 300, 500];
+    else                            offsets = [25, 75, 150, 250, 400];
+
+    const pool = new Set();
+    for (const off of offsets) {
+      if (correctCents - off > 0) pool.add(correctCents - off);
+      pool.add(correctCents + off);
+    }
+    pool.delete(correctCents);
+    return shuffle([correctCents, ...shuffle([...pool]).slice(0, 3)]);
+  }
+
+  function onAnswer(btn, val, correct) {
+    if (answered) return;
+    answered = true;
+    clearInterval(timerInterval);
+    clearTimeout(hint1Timer);
+    clearTimeout(hint2Timer);
+
+    const elapsed = Math.round((Date.now() - questionStart) / 1000);
+    const fast = elapsed <= 8;
+
+    document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true);
+
+    if (val === correct) {
+      btn.classList.add('correct');
+      correctCount++;
+      score += fast ? 15 : 10;
+      document.getElementById('scoreDisplay').textContent = score;
+      adaptive.record(true, fast);
+      playSound('correct');
+      setTimeout(nextQuestion, 1200);
+    } else {
+      btn.classList.add('wrong');
+      document.querySelectorAll('.answer-btn').forEach(b => {
+        if (parseInt(b.dataset.cents) === correct) b.classList.add('correct');
+      });
+      adaptive.record(false);
+      playSound('wrong');
+      setTimeout(nextQuestion, 1600);
+    }
+  }
+
+  function nextQuestion() {
+    qIndex++;
+    if (qIndex >= totalQ) showVictory();
+    else loadQuestion();
+  }
+
+  function showVictory() {
+    clearInterval(timerInterval);
+    const pct = correctCount / totalQ;
+    let stars, emoji, title, msg;
+    if (pct >= 0.8) {
+      stars = '⭐⭐⭐'; emoji = '🏆';
+      title = 'Caixa Campeão!';
+      msg = 'Você domina as contas do mercado!';
+    } else if (pct >= 0.5) {
+      stars = '⭐⭐'; emoji = '🎉';
+      title = 'Muito Bem!';
+      msg = 'Continue praticando para dominar o mercado!';
+    } else {
+      stars = '⭐'; emoji = '💪';
+      title = 'Bom Esforço!';
+      msg = 'Tente novamente — prática leva à perfeição!';
+    }
+    document.getElementById('vicEmoji').textContent    = emoji;
+    document.getElementById('vicTitle').textContent    = title;
+    document.getElementById('vicMsg').textContent      = msg;
+    document.getElementById('vicStars').textContent    = stars;
+    document.getElementById('statCorrect').textContent = correctCount;
+    document.getElementById('statTotal').textContent   = totalQ;
+    document.getElementById('statScore').textContent   = score;
+    showScreen('screenVic');
+  }
+
+  function formatMoney(cents) {
+    return 'R$ ' + (cents / 100).toFixed(2).replace('.', ',');
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function startStopwatch() {
+    stopwatchSecs = 0;
+    document.getElementById('stopwatch').textContent = '⏱ 0s';
+    timerInterval = setInterval(() => {
+      stopwatchSecs++;
+      document.getElementById('stopwatch').textContent = `⏱ ${stopwatchSecs}s`;
+    }, 1000);
+  }
+
+  function showHintBar(text) { const b = document.getElementById('hintBar'); b.textContent = text; b.classList.add('show'); }
+  function hideHintBar()     { document.getElementById('hintBar').classList.remove('show'); }
+  function showScreen(id)    { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+  function goBack()          { clearInterval(timerInterval); showScreen('screenDiff'); }
+  function goToDiff()        { showScreen('screenDiff'); }
+  function restartGame()     { beginGame(); }
+
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let actx;
+  function getCtx() { if (!actx) actx = new AudioCtx(); return actx; }
+  function playSound(type) {
+    try {
+      const ctx = getCtx();
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      if (type === 'correct') {
+        osc.frequency.setValueAtTime(523, ctx.currentTime);
+        osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
+        osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.14, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.5);
+      } else {
+        osc.frequency.setValueAtTime(300, ctx.currentTime);
+        osc.frequency.setValueAtTime(200, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.14, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.3);
+      }
+    } catch(e) {}
+  }
+</script>
+<script src="../nipo.js"></script>
+</body>
+</html>

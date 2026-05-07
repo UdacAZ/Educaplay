@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mestre das Trocas – EducaPlay</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pu: #9C27B0; --pu-d: #6A1B9A; --pu-l: #E1BEE7; --pu-bg: #F3E5F5;
+      --or: #FF8F00; --or-l: #FFF8E1;
+      --gr: #4CAF50; --gr-d: #2E7D32;
+      --re: #F44336;
+      --white: #fff; --text: #2d3a4a;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Nunito', sans-serif; background: var(--pu-bg); color: var(--text); min-height: 100vh; }
+
+    .screen { display: none; min-height: 100vh; flex-direction: column; }
+    .screen.active { display: flex; }
+
+    /* ── HEADER ── */
+    .g-header {
+      background: var(--pu-d); color: white;
+      padding: 13px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+    }
+    .g-header a, .g-back { color: white; text-decoration: none; font-size: 1.45rem; background: none; border: none; cursor: pointer; padding: 2px; }
+    .g-header h1 { font-size: 1.1rem; font-weight: 800; flex: 1; }
+    .audio-toggle {
+      background: rgba(255,255,255,0.18); border: none; color: white;
+      width: 34px; height: 34px; border-radius: 50%; font-size: 1rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .audio-toggle.muted { opacity: 0.45; }
+
+    /* ── DIFFICULTY ── */
+    .diff-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; gap: 28px; }
+    .diff-heading { text-align: center; }
+    .diff-heading h2 { font-size: 1.9rem; font-weight: 900; color: var(--pu-d); margin-bottom: 6px; }
+    .diff-heading p  { color: #666; }
+    .diff-cards { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; }
+    .diff-card {
+      background: white; border-radius: 20px; padding: 30px 26px; width: 185px;
+      text-align: center; cursor: pointer; border: 3px solid transparent;
+      box-shadow: 0 4px 16px rgba(106,27,154,.12); transition: all .2s;
+    }
+    .diff-card:hover { border-color: var(--pu); transform: translateY(-5px); }
+    .d-emoji { font-size: 2.6rem; margin-bottom: 10px; }
+    .d-name  { font-size: 1.15rem; font-weight: 900; color: var(--pu-d); margin-bottom: 5px; }
+    .d-desc  { font-size: 0.8rem; color: #777; line-height: 1.5; }
+
+    /* ── TUTORIAL ── */
+    .tuto-body { flex: 1; display: flex; align-items: center; justify-content: center; padding: 28px 20px; }
+    .tuto-wrap { background: white; border-radius: 22px; padding: 36px 32px; max-width: 520px; width: 100%; box-shadow: 0 8px 32px rgba(106,27,154,.12); }
+    .tuto-head { text-align: center; margin-bottom: 24px; }
+    .tuto-head .ti { font-size: 2.8rem; margin-bottom: 8px; }
+    .tuto-head h2 { font-size: 1.45rem; font-weight: 900; color: var(--pu-d); margin-bottom: 4px; }
+    .tuto-head p  { color: #666; }
+    .steps { margin-bottom: 22px; }
+    .step  { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+    .sn { background: var(--pu); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0; }
+    .st { padding-top: 3px; color: #444; line-height: 1.5; font-size: 0.95rem; }
+    .st strong { color: var(--pu-d); }
+    .example-box { background: var(--pu-bg); border-radius: 12px; padding: 14px 18px; margin-bottom: 22px; text-align: center; }
+    .ex-wrong   { font-size: 1.5rem; font-weight: 900; color: var(--or); letter-spacing: 4px; margin-bottom: 4px; }
+    .ex-arrow   { color: #aaa; margin-bottom: 4px; font-size: 1.1rem; }
+    .ex-correct { font-size: 1.5rem; font-weight: 900; color: var(--gr-d); letter-spacing: 4px; }
+    .btn-start {
+      width: 100%; padding: 14px; background: var(--pu); color: white; border: none;
+      border-radius: 13px; font-size: 1.05rem; font-weight: 800; font-family: 'Nunito', sans-serif;
+      cursor: pointer; transition: background .2s, transform .15s;
+    }
+    .btn-start:hover { background: var(--pu-d); transform: translateY(-2px); }
+
+    /* ── PROGRESS BAR ── */
+    .prog-bar-wrap { background: rgba(0,0,0,0.18); height: 6px; flex-shrink: 0; }
+    .prog-bar-fill { height: 100%; background: #FFD700; transition: width .4s ease; border-radius: 3px; }
+
+    /* ── GAME BODY ── */
+    .game-body { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 18px 16px 30px; gap: 16px; overflow-y: auto; }
+
+    /* HUD row */
+    .hud-row { display: flex; align-items: center; width: 100%; max-width: 580px; gap: 10px; }
+    .hud-word-num { font-size: 0.85rem; font-weight: 700; color: rgba(0,0,0,0.4); }
+    .hud-score { margin-left: auto; background: white; border-radius: 20px; padding: 5px 14px; font-weight: 800; color: var(--pu-d); font-size: 0.92rem; }
+
+    /* Category badge */
+    .cat-badge { font-size: 0.72rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: var(--pu-l); color: var(--pu-d); }
+
+    /* Word card */
+    .word-card {
+      background: white; border-radius: 22px; padding: 24px 20px;
+      width: 100%; max-width: 580px; text-align: center;
+      box-shadow: 0 4px 20px rgba(106,27,154,.1); transition: background .3s, box-shadow .3s;
+    }
+    .word-card.flash-ok { background: #E8F5E9; box-shadow: 0 4px 20px rgba(76,175,80,.3); }
+    .word-card.flash-ng { background: #FFEBEE; box-shadow: 0 4px 20px rgba(244,67,54,.2); }
+
+    .word-emoji   { font-size: 3.2rem; display: block; margin-bottom: 8px; }
+    .word-hint    { font-size: 0.85rem; color: #999; margin-bottom: 14px; font-style: italic; }
+    .speak-btn {
+      background: var(--pu-l); border: none; border-radius: 10px;
+      padding: 7px 14px; font-size: 0.88rem; font-weight: 700; color: var(--pu-d);
+      cursor: pointer; margin-bottom: 16px; display: inline-flex; align-items: center; gap: 5px;
+    }
+    .speak-btn:hover { background: #CE93D8; }
+
+    .wrong-label { font-size: 0.72rem; font-weight: 800; letter-spacing: 1px; color: var(--or); text-transform: uppercase; margin-bottom: 8px; }
+
+    /* Letter blocks */
+    .lblocks { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; margin-bottom: 6px; }
+    .lb {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 44px; height: 52px; padding: 0 6px;
+      border-radius: 10px; font-size: 1.65rem; font-weight: 900; line-height: 1;
+      background: #F5F5F5; border: 2px solid #E0E0E0; color: var(--text);
+      transition: all .35s;
+    }
+    .lb.sz-sm  { min-width: 34px; height: 44px; font-size: 1.2rem; }
+    .lb.sz-md  { min-width: 39px; height: 48px; font-size: 1.4rem; }
+    .lb.err { background: #FFF3E0; border: 2.5px dashed var(--or); color: var(--or); animation: pulse-err 1.6s ease-in-out infinite; }
+    .lb.ok  { background: #E8F5E9; border: 2px solid var(--gr); color: var(--gr-d); animation: none; }
+    @keyframes pulse-err { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+
+    .options-label { font-size: 0.88rem; color: #999; margin-top: 4px; }
+
+    /* Options */
+    .opts-wrap { width: 100%; max-width: 580px; display: flex; flex-direction: column; gap: 10px; }
+    .opt {
+      background: white; border: 3px solid #E0E0E0; border-radius: 15px;
+      padding: 15px 20px; font-size: 1.3rem; font-weight: 900; letter-spacing: 3px;
+      color: var(--text); cursor: pointer; font-family: 'Nunito', monospace;
+      transition: all .2s; box-shadow: 0 2px 8px rgba(0,0,0,.05); text-align: center;
+    }
+    .opt:hover:not(:disabled) { border-color: var(--pu); background: var(--pu-bg); transform: translateY(-2px); }
+    .opt.is-correct  { border-color: var(--gr);  background: #E8F5E9; color: var(--gr-d); }
+    .opt.is-wrong    { border-color: var(--re);  background: #FFEBEE; color: var(--re); animation: shake .35s ease; }
+    .opt.is-revealed { border-color: var(--gr);  background: #E8F5E9; color: var(--gr-d); }
+    .opt:disabled    { cursor: default; opacity: 0.45; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 40%{transform:translateX(7px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+
+    /* Feedback badge */
+    .feedback { display: none; text-align: center; font-size: 1rem; font-weight: 800; padding: 10px 18px; border-radius: 12px; }
+    .feedback.show    { display: block; }
+    .feedback.ok      { background: #E8F5E9; color: var(--gr-d); }
+    .feedback.ng      { background: var(--or-l); color: #E65100; }
+    .feedback.reveal  { background: #E3F2FD; color: #1565C0; }
+
+    /* Next button */
+    .next-btn {
+      display: none; width: 100%; max-width: 580px;
+      padding: 15px; background: var(--pu); color: white; border: none;
+      border-radius: 15px; font-size: 1.05rem; font-weight: 800;
+      font-family: 'Nunito', sans-serif; cursor: pointer; transition: all .2s;
+    }
+    .next-btn.show { display: block; }
+    .next-btn:hover { background: var(--pu-d); transform: translateY(-2px); }
+
+    /* ── VICTORY ── */
+    .vic-body { flex: 1; display: flex; align-items: center; justify-content: center; padding: 28px 20px; }
+    .vic-card { background: white; border-radius: 26px; padding: 38px 30px; max-width: 460px; width: 100%; text-align: center; box-shadow: 0 8px 40px rgba(106,27,154,.15); }
+    .vic-emoji { font-size: 72px; display: block; margin-bottom: 12px; }
+    .vic-card h2   { font-size: 1.9rem; font-weight: 900; color: var(--pu-d); margin-bottom: 7px; }
+    .vic-card > p  { color: #708090; margin-bottom: 18px; }
+    .vic-stars     { font-size: 46px; letter-spacing: 6px; margin-bottom: 20px; }
+    .vic-stats     { display: flex; gap: 12px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap; }
+    .v-stat        { background: var(--pu-bg); border-radius: 13px; padding: 13px 20px; }
+    .v-num         { font-size: 28px; font-weight: 900; color: var(--pu-d); display: block; }
+    .v-lbl         { font-size: 11px; color: #708090; }
+    .vic-btns      { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .btn           { border: none; border-radius: 13px; padding: 13px 26px; font-size: 15px; font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif; transition: all .2s; }
+    .btn-primary   { background: var(--pu);  color: white; }
+    .btn-primary:hover { background: var(--pu-d); transform: translateY(-2px); }
+    .btn-outline   { background: transparent; color: var(--pu); border: 2px solid var(--pu); }
+    .btn-outline:hover { background: var(--pu-bg); }
+    .btn-green     { background: var(--gr); color: white; }
+    .btn-green:hover { background: var(--gr-d); transform: translateY(-2px); }
+
+    @media (max-width: 480px) {
+      .diff-card { width: 100%; max-width: 280px; }
+      .opt { font-size: 1.1rem; letter-spacing: 2px; padding: 13px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ SCREEN 1: DIFICULDADE ══ -->
+<div class="screen active" id="sDiff">
+  <div class="g-header">
+    <a href="../dashboard.html">←</a>
+    <h1>✏️ Mestre das Trocas</h1>
+  </div>
+  <div class="diff-body">
+    <div class="diff-heading">
+      <h2>Escolha a Dificuldade</h2>
+      <p>Encontre o erro e escreva a palavra correta!</p>
+    </div>
+    <div class="diff-cards">
+      <div class="diff-card" onclick="startGame('facil')">
+        <div class="d-emoji">🌟</div>
+        <div class="d-name">Fácil</div>
+        <div class="d-desc">Palavras curtas<br>Com imagem e dica<br>3 opções</div>
+      </div>
+      <div class="diff-card" onclick="startGame('medio')">
+        <div class="d-emoji">🔥</div>
+        <div class="d-name">Médio</div>
+        <div class="d-desc">Palavras maiores<br>Com imagem<br>Sem dica de texto</div>
+      </div>
+      <div class="diff-card" onclick="startGame('dificil')">
+        <div class="d-emoji">💎</div>
+        <div class="d-name">Difícil</div>
+        <div class="d-desc">Palavras longas<br>Sem imagem<br>4 opções</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 2: TUTORIAL ══ -->
+<div class="screen" id="sTuto">
+  <div class="g-header">
+    <a href="#" onclick="showScreen('sDiff');return false;">←</a>
+    <h1>✏️ Como Jogar</h1>
+  </div>
+  <div class="tuto-body">
+    <div class="tuto-wrap">
+      <div class="tuto-head">
+        <div class="ti">✏️</div>
+        <h2>Mestre das Trocas</h2>
+        <p>Corrija o erro ortográfico na palavra!</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="sn">1</div>
+          <div class="st">Veja a palavra com <strong>erro</strong> — a letra errada fica em <strong style="color:var(--or)">laranja</strong>.</div>
+        </div>
+        <div class="step">
+          <div class="sn">2</div>
+          <div class="st">Ouça a palavra correta clicando em <strong>🔊 Ouvir</strong>.</div>
+        </div>
+        <div class="step">
+          <div class="sn">3</div>
+          <div class="st">Escolha a <strong>escrita correta</strong> entre as opções.</div>
+        </div>
+        <div class="step">
+          <div class="sn">4</div>
+          <div class="st">Acertou? <strong style="color:var(--gr-d)">Ótimo!</strong> Se errar, pode tentar de novo.</div>
+        </div>
+      </div>
+      <div class="example-box">
+        <div class="ex-wrong">X U V A</div>
+        <div class="ex-arrow">↓</div>
+        <div class="ex-correct">C H U V A</div>
+      </div>
+      <button class="btn-start" onclick="beginGame()">Jogar! ✏️</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 3: JOGO ══ -->
+<div class="screen" id="sGame">
+  <div class="g-header">
+    <button class="g-back" onclick="goBack()">←</button>
+    <h1>✏️ Mestre das Trocas</h1>
+    <button class="audio-toggle" id="audioToggle" onclick="toggleAudio()" title="Som">🔊</button>
+  </div>
+  <div class="prog-bar-wrap"><div class="prog-bar-fill" id="progFill" style="width:0%"></div></div>
+  <div class="game-body">
+    <div class="hud-row">
+      <span class="cat-badge" id="catBadge"></span>
+      <span class="hud-word-num" id="wordNum"></span>
+      <span class="hud-score" id="scoreDisp">⭐ 0</span>
+    </div>
+    <div class="word-card" id="wordCard">
+      <span class="word-emoji" id="wordEmoji"></span>
+      <p class="word-hint" id="wordHint"></p>
+      <button class="speak-btn" onclick="speakCurrent()">🔊 Ouvir a palavra</button>
+      <p class="wrong-label">Palavra com erro:</p>
+      <div class="lblocks" id="lblocks"></div>
+      <p class="options-label">Qual é a escrita correta?</p>
+    </div>
+    <div class="feedback" id="feedback"></div>
+    <div class="opts-wrap" id="optsWrap"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Próxima palavra ▶</button>
+  </div>
+</div>
+
+<!-- ══ SCREEN 4: VITÓRIA ══ -->
+<div class="screen" id="sVic">
+  <div class="g-header">
+    <a href="../dashboard.html">←</a>
+    <h1>✏️ Mestre das Trocas</h1>
+  </div>
+  <div class="vic-body">
+    <div class="vic-card">
+      <span class="vic-emoji" id="vicEmoji">🏆</span>
+      <h2 id="vicTitle">Parabéns!</h2>
+      <p id="vicMsg">Você dominou as trocas!</p>
+      <div class="vic-stars" id="vicStars">⭐⭐⭐</div>
+      <div class="vic-stats">
+        <div class="v-stat"><span class="v-num" id="vWords">0</span><span class="v-lbl">Palavras</span></div>
+        <div class="v-stat"><span class="v-num" id="vScore">0</span><span class="v-lbl">Pontos</span></div>
+        <div class="v-stat"><span class="v-num" id="vFirst">0</span><span class="v-lbl">De 1ª vez</span></div>
+      </div>
+      <div class="vic-btns">
+        <button class="btn btn-outline" onclick="showScreen('sDiff')">Mudar Nível</button>
+        <button class="btn btn-green"   onclick="beginGame()">Jogar Novamente</button>
+        <button class="btn btn-primary" onclick="location.href='../dashboard.html'">Início</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// BANCO DE PALAVRAS
+// ═══════════════════════════════════════════
+const DB = {
+  facil: [
+    { wrong:"JELO",    correct:"GELO",    emoji:"🧊", cat:"G / J",  eS:0,eL:1, opts:["JELO","GELO","YELO"],          hint:"Algo muito frio feito de água" },
+    { wrong:"CAZA",    correct:"CASA",    emoji:"🏠", cat:"S / Z",  eS:2,eL:1, opts:["CAZA","CAÇA","CASA"],           hint:"Onde moramos com a família" },
+    { wrong:"XUVA",    correct:"CHUVA",   emoji:"🌧️", cat:"X / CH", eS:0,eL:1, opts:["XUVA","CHUVA","SHUVA"],         hint:"Cai do céu quando está nublado" },
+    { wrong:"CACHORO", correct:"CACHORRO",emoji:"🐕", cat:"R / RR", eS:5,eL:1, opts:["CACHORO","CACHORRA","CACHORRO"],hint:"Animal doméstico que late" },
+    { wrong:"XAVE",    correct:"CHAVE",   emoji:"🔑", cat:"X / CH", eS:0,eL:1, opts:["XAVE","CHAVE","SHAVE"],         hint:"Usada para abrir fechaduras" },
+    { wrong:"ROZA",    correct:"ROSA",    emoji:"🌹", cat:"S / Z",  eS:2,eL:1, opts:["ROZA","ROCA","ROSA"],           hint:"Uma linda flor perfumada" },
+    { wrong:"JIRAFA",  correct:"GIRAFA",  emoji:"🦒", cat:"G / J",  eS:0,eL:1, opts:["JIRAFA","GIRAFA","GIRAFE"],     hint:"O animal mais alto do mundo" },
+    { wrong:"XAPÉU",   correct:"CHAPÉU",  emoji:"🎩", cat:"X / CH", eS:0,eL:1, opts:["XAPÉU","CHAPÉU","SHAPÉU"],     hint:"Colocamos na cabeça" },
+  ],
+  medio: [
+    { wrong:"AROZ",    correct:"ARROZ",   emoji:"🍚", cat:"R / RR", eS:1,eL:1, opts:["AROZ","AROS","ARROZ"],           hint:"Alimento muito consumido no Brasil" },
+    { wrong:"XINELO",  correct:"CHINELO", emoji:"🩴", cat:"X / CH", eS:0,eL:1, opts:["XINELO","CHINELO","SHINELO"],    hint:"Calçado simples e confortável" },
+    { wrong:"TEZOURA", correct:"TESOURA", emoji:"✂️", cat:"S / Z",  eS:2,eL:1, opts:["TEZOURA","TESOURA","TESSOURA"], hint:"Usada para cortar papel" },
+    { wrong:"FOJÃO",   correct:"FOGÃO",   emoji:"🍳", cat:"G / J",  eS:2,eL:1, opts:["FOJÃO","FOGÃO","FOGAO"],        hint:"Eletrodoméstico para cozinhar" },
+    { wrong:"ASUCAR",  correct:"AÇÚCAR",  emoji:"🍬", cat:"Ç / S",  eS:1,eL:1, opts:["ASUCAR","AÇUCAR","AÇÚCAR"],    hint:"Ingrediente doce das receitas" },
+    { wrong:"CABEZA",  correct:"CABEÇA",  emoji:"🤔", cat:"Ç / Z",  eS:4,eL:1, opts:["CABEZA","CABECA","CABEÇA"],    hint:"Onde fica o nosso cérebro" },
+    { wrong:"XEIROSO", correct:"CHEIROSO",emoji:"🌸", cat:"X / CH", eS:0,eL:1, opts:["XEIROSO","CHEIROSO","SHEIROSO"],hint:"Algo com cheiro muito bom" },
+    { wrong:"GRASAS",  correct:"GRAÇAS",  emoji:"🙏", cat:"Ç / S",  eS:3,eL:1, opts:["GRASAS","GRASSA","GRAÇAS"],    hint:"Expressão de agradecimento" },
+  ],
+  dificil: [
+    { wrong:"PROFESORA",  correct:"PROFESSORA",  emoji:"", cat:"S / SS", eS:5,eL:1, opts:["PROFESORA","PROFESSÔRA","PROFESSORA","PROFESORRA"] },
+    { wrong:"BORACHA",    correct:"BORRACHA",    emoji:"", cat:"R / RR", eS:2,eL:1, opts:["BORACHA","BORASHA","BORRASHA","BORRACHA"] },
+    { wrong:"MAXUCADO",   correct:"MACHUCADO",   emoji:"", cat:"X / CH", eS:2,eL:1, opts:["MAXUCADO","MASHUCADO","MACHUCADO","MAQUECADO"] },
+    { wrong:"JIRASSOL",   correct:"GIRASSOL",    emoji:"", cat:"G / J",  eS:0,eL:1, opts:["JIRASSOL","GIRASOL","JIRASOL","GIRASSOL"] },
+    { wrong:"TRAVESIA",   correct:"TRAVESSIA",   emoji:"", cat:"S / SS", eS:5,eL:1, opts:["TRAVESIA","TRAVECIA","TRAVESSIA","TRAVEZIA"] },
+    { wrong:"CARROSA",    correct:"CARROÇA",     emoji:"", cat:"Ç / S",  eS:5,eL:1, opts:["CARROSA","CARROCA","CAROSA","CARROÇA"] },
+    { wrong:"CACHORINHA", correct:"CACHORRINHA", emoji:"", cat:"R / RR", eS:5,eL:1, opts:["CACHORINHA","XACHORRINHA","CACHORRINHA","CACHURINHA"] },
+    { wrong:"DEZENHAR",   correct:"DESENHAR",    emoji:"", cat:"S / Z",  eS:2,eL:1, opts:["DEZENHAR","DESENHAR","DECENHAR","DEXENHAR"] },
+  ],
+};
+
+const CFG = {
+  facil:   { count:5, showEmoji:true,  showHint:true,  autoSpeak:true  },
+  medio:   { count:6, showEmoji:true,  showHint:false, autoSpeak:false },
+  dificil: { count:8, showEmoji:false, showHint:false, autoSpeak:false },
+};
+
+// ═══════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════
+let levelKey, cfg, questions, qIdx, score, firstTry, attempts, answered;
+let audioEnabled = true;
+
+// ═══════════════════════════════════════════
+// ÁUDIO
+// ═══════════════════════════════════════════
+const ACtx = window.AudioContext || window.webkitAudioContext;
+let actx;
+function getACtx() { if (!actx) actx = new ACtx(); return actx; }
+function beep(freq, dur, vol = 0.1) {
+  if (!audioEnabled) return;
+  try {
+    const c = getACtx(), o = c.createOscillator(), g = c.createGain();
+    o.connect(g); g.connect(c.destination);
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+    o.start(); o.stop(c.currentTime + dur);
+  } catch(e) {}
+}
+function playOk()   { beep(523,.07); setTimeout(()=>beep(659,.07),80); setTimeout(()=>beep(784,.14),160); }
+function playNg()   { beep(300,.12); setTimeout(()=>beep(220,.18),140); }
+function playWin()  { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.18),i*110)); }
+
+function speakWord(word) {
+  if (!audioEnabled) return;
+  try {
+    if (!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(word.toLowerCase());
+    u.lang = 'pt-BR'; u.rate = 0.72; u.pitch = 1.1;
+    speechSynthesis.speak(u);
+  } catch(e) {}
+}
+function speakCurrent() { speakWord(questions[qIdx].correct); }
+
+function toggleAudio() {
+  audioEnabled = !audioEnabled;
+  document.getElementById('audioToggle').classList.toggle('muted', !audioEnabled);
+  document.getElementById('audioToggle').textContent = audioEnabled ? '🔊' : '🔇';
+}
+
+// ═══════════════════════════════════════════
+// UTILITÁRIOS
+// ═══════════════════════════════════════════
+function shuffle(a) {
+  const b = [...a];
+  for (let i = b.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [b[i], b[j]] = [b[j], b[i]];
+  }
+  return b;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+// RENDER WORD COM HIGHLIGHT
+// ═══════════════════════════════════════════
+function renderBlocks(word, eS, eL, allCorrect = false) {
+  const sizeClass = word.length >= 9 ? 'sz-sm' : word.length >= 6 ? 'sz-md' : '';
+  let html = '';
+  for (let i = 0; i < word.length; i++) {
+    if (!allCorrect && i === eS) {
+      const part = word.substring(eS, eS + eL);
+      html += `<span class="lb ${sizeClass} err">${part}</span>`;
+      i += eL - 1;
+    } else {
+      const cls = allCorrect ? 'ok' : '';
+      html += `<span class="lb ${sizeClass} ${cls}">${word[i]}</span>`;
+    }
+  }
+  return html;
+}
+
+// ═══════════════════════════════════════════
+// CARREGAR QUESTÃO
+// ═══════════════════════════════════════════
+function loadQuestion(idx) {
+  answered = false;
+  attempts = 0;
+
+  const q   = questions[idx];
+  const tot = questions.length;
+
+  // progress bar
+  document.getElementById('progFill').style.width = `${(idx / tot) * 100}%`;
+  document.getElementById('wordNum').textContent   = `${idx + 1} de ${tot}`;
+  document.getElementById('catBadge').textContent  = q.cat;
+  document.getElementById('scoreDisp').textContent = `⭐ ${score}`;
+
+  // emoji
+  const emojiEl = document.getElementById('wordEmoji');
+  emojiEl.textContent = (cfg.showEmoji && q.emoji) ? q.emoji : '';
+  emojiEl.style.display = (cfg.showEmoji && q.emoji) ? 'block' : 'none';
+
+  // hint
+  const hintEl = document.getElementById('wordHint');
+  hintEl.textContent = (cfg.showHint && q.hint) ? q.hint : '';
+  hintEl.style.display = (cfg.showHint && q.hint) ? 'block' : 'none';
+
+  // word blocks
+  document.getElementById('lblocks').innerHTML = renderBlocks(q.wrong, q.eS, q.eL);
+
+  // word card reset
+  const card = document.getElementById('wordCard');
+  card.classList.remove('flash-ok', 'flash-ng');
+
+  // feedback reset
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.textContent = '';
+
+  // options
+  const opts = shuffle(q.opts);
+  const wrap = document.getElementById('optsWrap');
+  wrap.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.textContent = opt;
+    btn.onclick = () => onOptionClick(btn, opt);
+    wrap.appendChild(btn);
+  });
+
+  // next btn
+  document.getElementById('nextBtn').classList.remove('show');
+
+  // auto-speak
+  if (cfg.autoSpeak) setTimeout(() => speakWord(q.correct), 400);
+}
+
+// ═══════════════════════════════════════════
+// CLICK OPÇÃO
+// ═══════════════════════════════════════════
+function onOptionClick(btn, chosen) {
+  if (answered) return;
+
+  const q = questions[qIdx];
+
+  if (chosen === q.correct) {
+    // ── ACERTO ──
+    answered = true;
+    btn.classList.add('is-correct');
+    disableAllOpts();
+
+    const pts = attempts === 0 ? 10 : 5;
+    score += pts;
+    if (attempts === 0) firstTry++;
+
+    document.getElementById('scoreDisp').textContent = `⭐ ${score}`;
+
+    // blocos → correto
+    document.getElementById('lblocks').innerHTML = renderBlocks(q.correct, 0, 0, true);
+
+    const card = document.getElementById('wordCard');
+    card.classList.add('flash-ok');
+
+    showFeedback('ok', attempts === 0 ? `✓ Correto! +${pts} pontos 🎉` : `✓ Certo! +${pts} pontos`);
+    playOk();
+    speakWord(q.correct);
+
+    setTimeout(() => document.getElementById('nextBtn').classList.add('show'), 600);
+
+  } else {
+    // ── ERRO ──
+    attempts++;
+    btn.classList.add('is-wrong');
+    btn.disabled = true;
+    playNg();
+
+    const card = document.getElementById('wordCard');
+    card.classList.add('flash-ng');
+    setTimeout(() => card.classList.remove('flash-ng'), 400);
+
+    if (attempts >= 2) {
+      // revelar resposta
+      answered = true;
+      disableAllOpts();
+      revealCorrect(q.correct);
+      showFeedback('reveal', `A resposta correta é: ${q.correct}`);
+      setTimeout(() => document.getElementById('nextBtn').classList.add('show'), 800);
+    } else {
+      showFeedback('ng', 'Quase! Tente outra opção 💪');
+    }
+  }
+}
+
+function disableAllOpts() {
+  document.querySelectorAll('#optsWrap .opt').forEach(b => { b.disabled = true; });
+}
+
+function revealCorrect(correct) {
+  document.querySelectorAll('#optsWrap .opt').forEach(b => {
+    if (b.textContent === correct) b.classList.add('is-revealed');
+  });
+}
+
+function showFeedback(type, msg) {
+  const fb = document.getElementById('feedback');
+  fb.className = `feedback show ${type}`;
+  fb.textContent = msg;
+}
+
+// ═══════════════════════════════════════════
+// PRÓXIMA / VITÓRIA
+// ═══════════════════════════════════════════
+function nextQuestion() {
+  qIdx++;
+  if (qIdx >= questions.length) showVictory();
+  else loadQuestion(qIdx);
+}
+
+function showVictory() {
+  const pct = firstTry / questions.length;
+  let stars, emoji, title, msg;
+  if      (pct >= 0.8) { stars='⭐⭐⭐'; emoji='🏆'; title='Mestre das Trocas!';    msg='Você dominou a ortografia!'; }
+  else if (pct >= 0.5) { stars='⭐⭐';   emoji='🎉'; title='Muito Bem!';             msg='Continue praticando!'; }
+  else                 { stars='⭐';     emoji='💪'; title='Bom Esforço!';           msg='Pratique mais e vai melhorar!'; }
+
+  document.getElementById('vicEmoji').textContent  = emoji;
+  document.getElementById('vicTitle').textContent  = title;
+  document.getElementById('vicMsg').textContent    = msg;
+  document.getElementById('vicStars').textContent  = stars;
+  document.getElementById('vWords').textContent    = questions.length;
+  document.getElementById('vScore').textContent    = score;
+  document.getElementById('vFirst').textContent    = firstTry;
+
+  playWin();
+  document.getElementById('progFill').style.width = '100%';
+  showScreen('sVic');
+}
+
+// ═══════════════════════════════════════════
+// FLOW
+// ═══════════════════════════════════════════
+function startGame(key) {
+  levelKey = key;
+  cfg = CFG[key];
+  showScreen('sTuto');
+}
+
+function beginGame() {
+  score = 0; firstTry = 0; qIdx = 0;
+  questions = shuffle([...DB[levelKey]]).slice(0, cfg.count);
+  showScreen('sGame');
+  loadQuestion(0);
+}
+
+function goBack() {
+  speechSynthesis && speechSynthesis.cancel();
+  showScreen('sDiff');
+}
+</script>
+<script src="../nipo.js"></script>
+</body>
+</html>

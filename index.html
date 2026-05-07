@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EducaPlay - Aprender Brincando</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <span class="logo-icon">🎮</span>
+        <span class="logo-text">Educa<span class="logo-highlight">Play</span></span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#features">Recursos</a></li>
+        <li><a href="#games">Jogos</a></li>
+        <li><a href="#pricing">Planos</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-outline">Entrar</a>
+        <a href="login.html#cadastro" class="btn btn-primary">Cadastrar</a>
+      </div>
+      <button class="hamburger" onclick="toggleMenu()">☰</button>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="#features">Recursos</a>
+      <a href="#games">Jogos</a>
+      <a href="#pricing">Planos</a>
+      <a href="login.html">Entrar</a>
+      <a href="login.html#cadastro" class="btn btn-primary">Cadastrar</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">✨ Aprendizado Divertido</div>
+      <h1 class="hero-title">Aprender nunca foi tão <span class="highlight">divertido!</span></h1>
+      <p class="hero-subtitle">Jogos educativos interativos para crianças aprenderem matemática, português, ciências e muito mais — de forma leve e envolvente.</p>
+      <div class="hero-actions">
+        <a href="login.html#cadastro" class="btn btn-primary btn-large">Começar Grátis</a>
+        <a href="#games" class="btn btn-ghost btn-large">Ver Jogos</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><strong>50+</strong><span>Jogos</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><strong>10k+</strong><span>Alunos</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><strong>4.9★</strong><span>Avaliação</span></div>
+      </div>
+    </div>
+    <div class="hero-image">
+      <div class="hero-card floating">
+        <div class="card-emoji">🧩</div>
+        <p>Quebra-Cabeça</p>
+        <div class="progress-bar"><div class="progress" style="width:70%"></div></div>
+      </div>
+      <div class="hero-card floating delay-1">
+        <div class="card-emoji">🔢</div>
+        <p>Matemática</p>
+        <div class="progress-bar"><div class="progress" style="width:85%"></div></div>
+      </div>
+      <div class="hero-card floating delay-2">
+        <div class="card-emoji">🔤</div>
+        <p>Português</p>
+        <div class="progress-bar"><div class="progress" style="width:60%"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="section-container">
+      <div class="section-header">
+        <h2>Por que escolher o <span class="highlight">EducaPlay?</span></h2>
+        <p>Uma plataforma pensada para tornar o aprendizado uma aventura</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>Conteúdo Curricular</h3>
+          <p>Jogos alinhados ao currículo escolar brasileiro, do 1º ao 9º ano.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Acompanhe o Progresso</h3>
+          <p>Relatórios detalhados para pais e professores acompanharem a evolução.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🏆</div>
+          <h3>Sistema de Recompensas</h3>
+          <p>Conquistas, medalhas e rankings que motivam as crianças a aprender mais.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3>Funciona em Qualquer Tela</h3>
+          <p>Acesse pelo computador, tablet ou celular sem precisar instalar nada.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3>Ambiente Seguro</h3>
+          <p>Plataforma 100% segura, sem anúncios e adequada para crianças.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🆕</div>
+          <h3>Novos Jogos Todo Mês</h3>
+          <p>A biblioteca cresce constantemente com novos jogos e desafios.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GAMES PREVIEW -->
+  <section class="games-preview" id="games">
+    <div class="section-container">
+      <div class="section-header">
+        <h2>Alguns dos nossos <span class="highlight">Jogos</span></h2>
+        <p>Explore uma amostra da nossa biblioteca de jogos educativos</p>
+      </div>
+      <div class="games-grid">
+        <div class="game-card">
+          <div class="game-thumb" style="background: linear-gradient(135deg, #7EC8E3, #4A9EC4);">
+            <span>🔢</span>
+          </div>
+          <div class="game-info">
+            <span class="game-tag">Matemática</span>
+            <h4>Aventura dos Números</h4>
+            <p>Operações básicas em forma de aventura</p>
+          </div>
+        </div>
+        <div class="game-card">
+          <div class="game-thumb" style="background: linear-gradient(135deg, #A8D8A8, #5BAD5B);">
+            <span>🔤</span>
+          </div>
+          <div class="game-info">
+            <span class="game-tag">Português</span>
+            <h4>Caça-Palavras Mágico</h4>
+            <p>Encontre palavras e aprenda ortografia</p>
+          </div>
+        </div>
+        <div class="game-card">
+          <div class="game-thumb" style="background: linear-gradient(135deg, #FFD6A5, #FF9F43);">
+            <span>🧪</span>
+          </div>
+          <div class="game-info">
+            <span class="game-tag">Ciências</span>
+            <h4>Laboratório Curioso</h4>
+            <p>Experimentos virtuais e descobertas</p>
+          </div>
+        </div>
+        <div class="game-card">
+          <div class="game-thumb" style="background: linear-gradient(135deg, #C3A8D8, #8B5BAD);">
+            <span>🧩</span>
+          </div>
+          <div class="game-info">
+            <span class="game-tag">Raciocínio</span>
+            <h4>Quebra-Cabeça Mental</h4>
+            <p>Desafios de lógica e memória</p>
+          </div>
+        </div>
+        <div class="game-card">
+          <div class="game-thumb" style="background: linear-gradient(135deg, #FFB3BA, #E05C6E);">
+            <span>🗺️</span>
+          </div>
+          <div class="game-info">
+            <span class="game-tag">Geografia</span>
+            <h4>Viagem pelo Brasil</h4>
+            <p>Conheça estados, capitais e culturas</p>
+          </div>
+        </div>
+        <div class="game-card locked">
+          <div class="game-thumb" style="background: linear-gradient(135deg, #B0C4DE, #708090);">
+            <span>🔒</span>
+          </div>
+          <div class="game-info">
+            <span class="game-tag">Em Breve</span>
+            <h4>+45 jogos disponíveis</h4>
+            <p>Assine e acesse a biblioteca completa</p>
+          </div>
+        </div>
+      </div>
+      <div class="games-cta">
+        <a href="login.html#cadastro" class="btn btn-primary btn-large">Ver Todos os Jogos</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="pricing" id="pricing">
+    <div class="section-container">
+      <div class="section-header">
+        <h2>Planos e <span class="highlight">Preços</span></h2>
+        <p>Invista no aprendizado do seu filho por menos do que um lanche</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="pricing-header">
+            <h3>Gratuito</h3>
+            <div class="price"><span class="price-value">R$ 0</span><span class="price-period">/mês</span></div>
+          </div>
+          <ul class="pricing-features">
+            <li>✅ 5 jogos disponíveis</li>
+            <li>✅ Progresso básico</li>
+            <li>❌ Sem relatórios</li>
+            <li>❌ Sem conquistas</li>
+            <li>❌ Novos jogos mensais</li>
+          </ul>
+          <a href="login.html#cadastro" class="btn btn-outline btn-full">Começar Grátis</a>
+        </div>
+        <div class="pricing-card featured">
+          <div class="popular-badge">Mais Popular</div>
+          <div class="pricing-header">
+            <h3>Mensal</h3>
+            <div class="price"><span class="price-value">R$ 19,90</span><span class="price-period">/mês</span></div>
+          </div>
+          <ul class="pricing-features">
+            <li>✅ Todos os jogos (50+)</li>
+            <li>✅ Progresso detalhado</li>
+            <li>✅ Relatórios para pais</li>
+            <li>✅ Sistema de conquistas</li>
+            <li>✅ Novos jogos todo mês</li>
+          </ul>
+          <a href="login.html#cadastro" class="btn btn-primary btn-full">Assinar Agora</a>
+        </div>
+        <div class="pricing-card">
+          <div class="pricing-header">
+            <h3>Anual</h3>
+            <div class="price"><span class="price-value">R$ 159,90</span><span class="price-period">/ano</span></div>
+            <span class="price-economy">Economize 33%</span>
+          </div>
+          <ul class="pricing-features">
+            <li>✅ Tudo do plano Mensal</li>
+            <li>✅ Prioridade no suporte</li>
+            <li>✅ Acesso antecipado</li>
+            <li>✅ Certificados digitais</li>
+            <li>✅ 2 meses grátis</li>
+          </ul>
+          <a href="login.html#cadastro" class="btn btn-outline btn-full">Assinar Anual</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="testimonials">
+    <div class="section-container">
+      <div class="section-header">
+        <h2>O que dizem os <span class="highlight">pais</span></h2>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <p>"Minha filha pede para estudar todos os dias agora! O EducaPlay transformou a rotina dela."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar" style="background:#7EC8E3">A</div>
+            <div><strong>Ana Paula</strong><span>Mãe de Luísa, 8 anos</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <p>"As notas do meu filho melhoraram muito desde que começamos a usar a plataforma. Recomendo!"</p>
+          <div class="testimonial-author">
+            <div class="author-avatar" style="background:#A8D8A8">R</div>
+            <div><strong>Ricardo Souza</strong><span>Pai de Pedro, 10 anos</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <p>"Como professora, uso o EducaPlay como complemento em sala de aula. Os alunos adoram!"</p>
+          <div class="testimonial-author">
+            <div class="author-avatar" style="background:#FFD6A5">C</div>
+            <div><strong>Carla Mendes</strong><span>Professora do 3º ano</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <div class="logo">
+          <span class="logo-icon">🎮</span>
+          <span class="logo-text">Educa<span class="logo-highlight">Play</span></span>
+        </div>
+        <p>Tornando o aprendizado uma aventura diária para crianças de todo o Brasil.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Plataforma</h4>
+        <a href="#games">Jogos</a>
+        <a href="#pricing">Planos</a>
+        <a href="#features">Recursos</a>
+      </div>
+      <div class="footer-links">
+        <h4>Suporte</h4>
+        <a href="#">Central de Ajuda</a>
+        <a href="#">Contato</a>
+        <a href="#">Fale Conosco</a>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <a href="#">Termos de Uso</a>
+        <a href="#">Privacidade</a>
+        <a href="#">LGPD</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 EducaPlay. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="nipo.js"></script>
+  <script>
+    window.addEventListener('load', function () {
+      nipoWelcome('Olá! Sou o <strong>Nipo</strong>, seu companheiro de aprendizado!<br>Vamos aprender brincando? 🦆');
+    });
+
+    function toggleMenu() {
+      const menu = document.getElementById('mobileMenu');
+      menu.classList.toggle('open');
+    }
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const navbar = document.querySelector('.navbar');
+      if (window.scrollY > 50) navbar.classList.add('scrolled');
+      else navbar.classList.remove('scrolled');
+    });
+  </script>
+</body>
+</html>

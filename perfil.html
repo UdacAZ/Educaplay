@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EducaPlay - Meu Perfil</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+</head>
+<body class="dashboard-page">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">🎮</span>
+      <span class="logo-text">Educa<span class="logo-highlight">Play</span></span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <span class="nav-icon">🏠</span><span class="nav-label">Dashboard</span>
+      </a>
+      <a href="perfil.html" class="nav-item active">
+        <span class="nav-icon">👤</span><span class="nav-label">Meu Perfil</span>
+      </a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="user-avatar">👦</div>
+        <div class="user-info">
+          <strong>Olá, Aluno!</strong>
+          <span>Plano Mensal</span>
+        </div>
+      </div>
+      <a href="index.html" class="nav-item logout">
+        <span class="nav-icon">🚪</span><span class="nav-label">Sair</span>
+      </a>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- MAIN -->
+  <main class="dashboard-main">
+
+    <header class="dashboard-header">
+      <div class="header-left">
+        <button class="hamburger-dash" onclick="toggleSidebar()">☰</button>
+        <div class="header-breadcrumb">
+          <a href="dashboard.html">Dashboard</a>
+          <span>›</span>
+          <span>Meu Perfil</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <a href="perfil.html" class="header-avatar active-avatar">👦</a>
+      </div>
+    </header>
+
+    <div class="profile-page">
+
+      <div class="profile-page-header">
+        <h2>⚙️ Configurações</h2>
+        <p>Gerencie seu perfil, segurança e assinatura</p>
+      </div>
+
+      <div class="profile-layout">
+
+        <!-- TAB NAV -->
+        <nav class="profile-tabs">
+          <button class="ptab active" data-tab="perfil"       onclick="showTab('perfil', this)">👤 Meu Perfil</button>
+          <button class="ptab"         data-tab="seguranca"   onclick="showTab('seguranca', this)">🔒 Segurança</button>
+          <button class="ptab"         data-tab="assinatura"  onclick="showTab('assinatura', this)">💳 Assinatura</button>
+          <button class="ptab"         data-tab="preferencias" onclick="showTab('preferencias', this)">⚙️ Preferências</button>
+        </nav>
+
+        <!-- CONTENT -->
+        <div class="profile-content">
+
+          <!-- ===== PERFIL ===== -->
+          <section id="tab-perfil" class="ptab-panel">
+            <h3 class="ptab-title">Meu Perfil</h3>
+
+            <div class="avatar-section">
+              <div class="avatar-display" id="avatarDisplay">👦</div>
+              <div>
+                <p class="avatar-label">Escolha seu avatar</p>
+                <div class="avatar-grid">
+                  <button class="av-opt selected" onclick="selectAvatar(this, '👦')">👦</button>
+                  <button class="av-opt" onclick="selectAvatar(this, '👧')">👧</button>
+                  <button class="av-opt" onclick="selectAvatar(this, '🧑')">🧑</button>
+                  <button class="av-opt" onclick="selectAvatar(this, '👩')">👩</button>
+                  <button class="av-opt" onclick="selectAvatar(this, '🧒')">🧒</button>
+                  <button class="av-opt" onclick="selectAvatar(this, '🦸')">🦸</button>
+                  <button class="av-opt" onclick="selectAvatar(this, '🧙')">🧙</button>
+                  <button class="av-opt" onclick="selectAvatar(this, '🐱')">🐱</button>
+                </div>
+              </div>
+            </div>
+
+            <form onsubmit="savePerfil(event)" style="margin-top:24px">
+              <div class="form-group">
+                <label>Nome</label>
+                <div class="input-wrapper">
+                  <span class="input-icon">👤</span>
+                  <input type="text" id="inputNome" value="Aluno" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>E-mail</label>
+                <div class="input-wrapper input-readonly">
+                  <span class="input-icon">📧</span>
+                  <input type="email" value="aluno@email.com" readonly />
+                </div>
+                <span class="form-hint">Para alterar o e-mail, vá em <a href="#" onclick="showTab('seguranca', document.querySelector('[data-tab=seguranca]'))">Segurança</a></span>
+              </div>
+              <div class="form-group">
+                <label>Ano Escolar</label>
+                <div class="input-wrapper">
+                  <span class="input-icon">📚</span>
+                  <select>
+                    <option>1º ano</option>
+                    <option>2º ano</option>
+                    <option selected>3º ano</option>
+                    <option>4º ano</option>
+                    <option>5º ano</option>
+                    <option>6º ano</option>
+                    <option>7º ano</option>
+                    <option>8º ano</option>
+                    <option>9º ano</option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            </form>
+          </section>
+
+          <!-- ===== SEGURANÇA ===== -->
+          <section id="tab-seguranca" class="ptab-panel hidden">
+            <h3 class="ptab-title">Segurança</h3>
+
+            <div class="sec-card">
+              <h4>🔑 Alterar Senha</h4>
+              <form onsubmit="changePassword(event)">
+                <div class="form-group">
+                  <label>Senha atual</label>
+                  <div class="input-wrapper">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="curPwd" placeholder="Senha atual" required />
+                    <button type="button" class="toggle-password" onclick="toggleVis('curPwd')">👁</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Nova senha</label>
+                  <div class="input-wrapper">
+                    <span class="input-icon">🔑</span>
+                    <input type="password" id="newPwd" placeholder="Mínimo 8 caracteres" required oninput="calcStrength(this.value)" />
+                    <button type="button" class="toggle-password" onclick="toggleVis('newPwd')">👁</button>
+                  </div>
+                  <div class="password-strength" id="secBar"><div class="ps-bar"></div></div>
+                </div>
+                <div class="form-group">
+                  <label>Confirmar nova senha</label>
+                  <div class="input-wrapper">
+                    <span class="input-icon">🔑</span>
+                    <input type="password" id="confPwd" placeholder="Repita a nova senha" required />
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Alterar Senha</button>
+              </form>
+            </div>
+
+            <div class="sec-card">
+              <h4>📧 Alterar E-mail</h4>
+              <form onsubmit="changeEmail(event)">
+                <div class="form-group">
+                  <label>Novo e-mail</label>
+                  <div class="input-wrapper">
+                    <span class="input-icon">📧</span>
+                    <input type="email" placeholder="novo@email.com" required />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Confirmar senha</label>
+                  <div class="input-wrapper">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" placeholder="Sua senha atual" required />
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Alterar E-mail</button>
+              </form>
+            </div>
+
+            <div class="sec-card danger-card">
+              <h4>🔴 Zona de Perigo</h4>
+              <p>Exclui permanentemente sua conta, progresso e todos os dados.</p>
+              <button class="btn-danger-outline" onclick="confirmDelete()">Excluir minha conta</button>
+            </div>
+          </section>
+
+          <!-- ===== ASSINATURA ===== -->
+          <section id="tab-assinatura" class="ptab-panel hidden">
+            <h3 class="ptab-title">Minha Assinatura</h3>
+
+            <div class="plan-card-active">
+              <div class="pca-header">
+                <div>
+                  <span class="plan-status-badge">● Ativo</span>
+                  <h4>Plano Mensal</h4>
+                </div>
+                <div class="pca-price">R$ 19,90<span>/mês</span></div>
+              </div>
+              <div class="pca-details">
+                <div class="pca-item">📅 Próxima cobrança: <strong>30/05/2026</strong></div>
+                <div class="pca-item">💳 Cartão: <strong>•••• •••• •••• 4242</strong></div>
+              </div>
+              <div class="pca-perks">
+                <span>✅ Todos os 10 jogos</span>
+                <span>✅ Conquistas</span>
+                <span>✅ Progresso detalhado</span>
+              </div>
+              <div class="pca-actions">
+                <button class="btn btn-outline btn-sm" onclick="showToast('Em breve: gerenciar pagamento', 'info')">Gerenciar Pagamento</button>
+                <button class="btn-cancel-sub" onclick="confirmCancel()">Cancelar Assinatura</button>
+              </div>
+            </div>
+
+            <div class="plan-card-upgrade">
+              <div class="upgrade-ribbon">Economize 33%</div>
+              <div class="pcu-header">
+                <h4>Upgrade para o Plano Anual</h4>
+                <div class="pca-price">R$ 159,90<span>/ano</span></div>
+              </div>
+              <p class="pcu-sub">Equivale a <strong>R$ 13,33/mês</strong> — 2 meses grátis comparado ao mensal!</p>
+              <ul class="pcu-list">
+                <li>✅ Tudo do Plano Mensal</li>
+                <li>✅ Acesso antecipado a novos jogos</li>
+                <li>✅ Certificados digitais de conclusão</li>
+                <li>✅ Suporte prioritário</li>
+              </ul>
+              <button class="btn btn-primary" onclick="showToast('Em breve: upgrade para anual 🚀', 'info')">Fazer Upgrade Agora</button>
+            </div>
+
+            <div class="plan-history">
+              <h4>Histórico de Faturas</h4>
+              <div class="history-list">
+                <div class="history-item">
+                  <span>📄 Abril 2026</span>
+                  <span>Plano Mensal</span>
+                  <span class="history-val">R$ 19,90</span>
+                  <span class="history-ok">Pago</span>
+                </div>
+                <div class="history-item">
+                  <span>📄 Março 2026</span>
+                  <span>Plano Mensal</span>
+                  <span class="history-val">R$ 19,90</span>
+                  <span class="history-ok">Pago</span>
+                </div>
+                <div class="history-item">
+                  <span>📄 Fevereiro 2026</span>
+                  <span>Plano Mensal</span>
+                  <span class="history-val">R$ 19,90</span>
+                  <span class="history-ok">Pago</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== PREFERÊNCIAS ===== -->
+          <section id="tab-preferencias" class="ptab-panel hidden">
+            <h3 class="ptab-title">Preferências</h3>
+
+            <div class="pref-group">
+              <p class="pref-group-label">🎮 Jogos</p>
+              <div class="pref-item">
+                <div class="pref-info">
+                  <span class="pref-icon">🔊</span>
+                  <div>
+                    <strong>Sons nos Jogos</strong>
+                    <p>Efeitos sonoros e feedback de áudio</p>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked onchange="saveToast()" />
+                  <span class="ts-slider"></span>
+                </label>
+              </div>
+              <div class="pref-item">
+                <div class="pref-info">
+                  <span class="pref-icon">🎵</span>
+                  <div>
+                    <strong>Música de Fundo</strong>
+                    <p>Música ambiente durante os jogos</p>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" onchange="saveToast()" />
+                  <span class="ts-slider"></span>
+                </label>
+              </div>
+              <div class="pref-item">
+                <div class="pref-info">
+                  <span class="pref-icon">✨</span>
+                  <div>
+                    <strong>Animações</strong>
+                    <p>Efeitos visuais e transições nos jogos</p>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked onchange="saveToast()" />
+                  <span class="ts-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="pref-group">
+              <p class="pref-group-label">♿ Acessibilidade</p>
+              <div class="pref-item">
+                <div class="pref-info">
+                  <span class="pref-icon">🔤</span>
+                  <div>
+                    <strong>Fonte para Dislexia</strong>
+                    <p>Ativa uma fonte especial que facilita a leitura</p>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" onchange="saveToast()" />
+                  <span class="ts-slider"></span>
+                </label>
+              </div>
+              <div class="pref-item">
+                <div class="pref-info">
+                  <span class="pref-icon">🔆</span>
+                  <div>
+                    <strong>Alto Contraste</strong>
+                    <p>Melhora a visibilidade para baixa visão</p>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" onchange="saveToast()" />
+                  <span class="ts-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="pref-group">
+              <p class="pref-group-label">📧 Notificações</p>
+              <div class="pref-item">
+                <div class="pref-info">
+                  <span class="pref-icon">📊</span>
+                  <div>
+                    <strong>Resumo Semanal</strong>
+                    <p>Receba um e-mail com o progresso da semana</p>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked onchange="saveToast()" />
+                  <span class="ts-slider"></span>
+                </label>
+              </div>
+              <div class="pref-item">
+                <div class="pref-info">
+                  <span class="pref-icon">🏆</span>
+                  <div>
+                    <strong>Conquistas por E-mail</strong>
+                    <p>Notificar quando conquistar uma medalha</p>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked onchange="saveToast()" />
+                  <span class="ts-slider"></span>
+                </label>
+              </div>
+            </div>
+
+          </section>
+
+        </div><!-- /profile-content -->
+      </div><!-- /profile-layout -->
+    </div><!-- /profile-page -->
+
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /* ---- Sidebar ---- */
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('show');
+    }
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('overlay').classList.remove('show');
+    }
+
+    /* ---- Tabs ---- */
+    function showTab(name, el) {
+      document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.ptab-panel').forEach(p => p.classList.add('hidden'));
+      el.classList.add('active');
+      document.getElementById('tab-' + name).classList.remove('hidden');
+    }
+
+    /* ---- Toast ---- */
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `toast ${type} show`;
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+    function saveToast() { showToast('✅ Preferência salva!'); }
+
+    /* ---- Avatar ---- */
+    function selectAvatar(btn, emoji) {
+      document.querySelectorAll('.av-opt').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('avatarDisplay').textContent = emoji;
+    }
+
+    /* ---- Forms ---- */
+    function savePerfil(e) {
+      e.preventDefault();
+      showToast('✅ Perfil atualizado!');
+    }
+
+    function toggleVis(id) {
+      const el = document.getElementById(id);
+      el.type = el.type === 'password' ? 'text' : 'password';
+    }
+
+    function calcStrength(val) {
+      const bar = document.querySelector('#secBar .ps-bar');
+      let score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      const colors = ['#e74c3c', '#e67e22', '#f1c40f', '#27ae60'];
+      const widths  = ['25%', '50%', '75%', '100%'];
+      bar.style.width     = val.length ? (widths[score - 1]  || '10%')       : '0%';
+      bar.style.background = val.length ? (colors[score - 1] || '#e74c3c') : 'transparent';
+    }
+
+    function changePassword(e) {
+      e.preventDefault();
+      const nv = document.getElementById('newPwd').value;
+      const cf = document.getElementById('confPwd').value;
+      if (nv !== cf) { showToast('As senhas não coincidem!', 'error'); return; }
+      if (nv.length < 8) { showToast('Senha muito curta!', 'error'); return; }
+      showToast('✅ Senha alterada com sucesso!');
+      e.target.reset();
+      document.querySelector('#secBar .ps-bar').style.width = '0';
+    }
+
+    function changeEmail(e) {
+      e.preventDefault();
+      showToast('✅ E-mail de confirmação enviado!');
+      e.target.reset();
+    }
+
+    function confirmDelete() {
+      if (confirm('⚠️ Tem certeza? Esta ação é irreversível e apagará todos os seus dados.')) {
+        showToast('Conta excluída. Redirecionando...', 'error');
+        setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+      }
+    }
+
+    function confirmCancel() {
+      if (confirm('Deseja cancelar sua assinatura? Você perderá o acesso ao fim do período atual.')) {
+        showToast('Assinatura cancelada. Válida até 30/05/2026.', 'error');
+      }
+    }
+
+    /* ---- URL hash navigation ---- */
+    const hash = window.location.hash.replace('#', '');
+    if (hash && document.querySelector('[data-tab="' + hash + '"]')) {
+      showTab(hash, document.querySelector('[data-tab="' + hash + '"]'));
+    }
+  </script>
+</body>
+</html>
